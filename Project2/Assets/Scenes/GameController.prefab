@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &377940024692050978
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 377940024692050976}
+  - component: {fileID: 377940024692050977}
+  m_Layer: 0
+  m_Name: GameController
+  m_TagString: GameController
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &377940024692050976
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 377940024692050978}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 18.73781, y: 0.30829144, z: -0.21280098}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &377940024692050977
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 377940024692050978}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 615b3b158fc388c4997a3e27bf02b0c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Trex1: {fileID: 0}
+  agents: []
+  agentDataJson: {fileID: 4900000, guid: 247d452633b4c2c428f1cc794217db60, type: 3}
+  agentPrefabs:
+  - {fileID: 67750011146956757, guid: 319713632d7b7dc47a23730887836d36, type: 3}
+  - {fileID: 4631760252193009882, guid: 012db4ac1af73c34db48a1b23e123410, type: 3}
+  bulletPrefab: {fileID: 2575174577542386459, guid: 9f30d0f2fc4cdb441aa463b55312e7a1, type: 3}
+  dinoIndex: 0

@@ -1,0 +1,106 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e251860fcd970734c9f14ebd98a146c3, type: 3}
+  m_Name: GS-20230326 - 195525
+  m_EditorClassIdentifier: 
+  m_name: Session 20230326-195525
+  m_description: 'Rocking out at Creativity Central!
+
+
+    If you like Gaia please
+    consider rating it :)'
+  m_previewImage: {fileID: 0}
+  m_dateCreated: 3/26/2023 7:55:25 PM
+  m_terrainWidth: 1024
+  m_terrainDepth: 1024
+  m_terrainHeight: 1024
+  m_seaLevel: 25
+  m_spawnDensity: 0.8
+  m_isLocked: 0
+  m_previewImageBytes: 
+  m_previewImageWidth: 0
+  m_previewImageHeight: 0
+  m_operations:
+  - m_description: Clear World
+    m_operationType: 10
+    m_isActive: 1
+    m_affectedTerrainNames: []
+    m_operationDateTime: 3/26/2023 8:03:24 PM
+    scriptableObjectAssetGUID: 
+    m_isFoldedOut: 0
+    sessionPlaybackState: 1
+    m_terrainsFoldedOut: 0
+    m_serializedExternalAction: 
+  - m_description: 'Creating World: 1 x 1 tiles, tile size: 2048'
+    m_operationType: 0
+    m_isActive: 1
+    m_affectedTerrainNames:
+    - Terrain_0_0-20230326 - 200324
+    m_operationDateTime: 3/26/2023 8:03:24 PM
+    scriptableObjectAssetGUID: adee3ad3f79dd8e419a5b8fda7371b1a
+    m_isFoldedOut: 0
+    sessionPlaybackState: 1
+    m_terrainsFoldedOut: 0
+    m_serializedExternalAction: 
+  - m_description: Spawning - Synty Tree Spawner(Clone)
+    m_operationType: 7
+    m_isActive: 1
+    m_affectedTerrainNames:
+    - Terrain_0_0-20230326 - 200324
+    m_operationDateTime: 3/26/2023 8:05:36 PM
+    scriptableObjectAssetGUID: 22e9b1a1ec99e8a42b8c4e08f61baf6e
+    m_isFoldedOut: 0
+    sessionPlaybackState: 1
+    m_terrainsFoldedOut: 0
+    m_serializedExternalAction: 
+  - m_description: Spawning - Synty Tree Spawner(Clone)
+    m_operationType: 7
+    m_isActive: 1
+    m_affectedTerrainNames:
+    - Terrain_0_0-20230326 - 200324
+    m_operationDateTime: 3/26/2023 8:11:25 PM
+    scriptableObjectAssetGUID: 7874ab8d7682c214c9fc4045ac9ddaef
+    m_isFoldedOut: 0
+    sessionPlaybackState: 1
+    m_terrainsFoldedOut: 0
+    m_serializedExternalAction: 
+  m_terrainMinMaxCache:
+  - guid: 980a49891d52620489d9f827cd027523
+    isWorldmap: 0
+    recalculate: 0
+    min: 0
+    max: 268.7541
+  - guid: Worldmap
+    isWorldmap: 1
+    recalculate: 0
+    min: 0
+    max: 0
+  m_bakedMaskCacheEntries:
+  - fileName: Terrain_0_0-20230326 - 200324_LayerGameObject_3584_5
+    assetPath: Assets/Procedural Worlds/Gaia/TerrainCollisionData/Terrain_0_0-20230326
+      - 200324/Terrain_0_0-20230326 - 200324_LayerGameObject_3584_5
+    fullPath: C:/Users/Mike/Documents/GitHub/Project2/Assets/Procedural Worlds/Gaia/TerrainCollisionData/Terrain_0_0-20230326
+      - 200324/Terrain_0_0-20230326 - 200324_LayerGameObject_3584_5
+    texture: {fileID: 0}
+  - fileName: Terrain_0_0-20230326 - 200324_RadiusTag_Synty Small Farm_50
+    assetPath: Assets/Procedural Worlds/Gaia/TerrainCollisionData/Terrain_0_0-20230326
+      - 200324/Terrain_0_0-20230326 - 200324_RadiusTag_Synty Small Farm_50
+    fullPath: C:/Users/Mike/Documents/GitHub/Project2/Assets/Procedural Worlds/Gaia/TerrainCollisionData/Terrain_0_0-20230326
+      - 200324/Terrain_0_0-20230326 - 200324_RadiusTag_Synty Small Farm_50
+    texture: {fileID: 0}
+  - fileName: Terrain_0_0-20230326 - 200324_RadiusTag_Synty Medium Farm_100
+    assetPath: Assets/Procedural Worlds/Gaia/TerrainCollisionData/Terrain_0_0-20230326
+      - 200324/Terrain_0_0-20230326 - 200324_RadiusTag_Synty Medium Farm_100
+    fullPath: C:/Users/Mike/Documents/GitHub/Project2/Assets/Procedural Worlds/Gaia/TerrainCollisionData/Terrain_0_0-20230326
+      - 200324/Terrain_0_0-20230326 - 200324_RadiusTag_Synty Medium Farm_100
+    texture: {fileID: 0}
+  m_worldBiomeMaskSettings: {fileID: 0}
