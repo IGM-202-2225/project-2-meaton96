@@ -10,7 +10,7 @@ public class PhysicsObject : MonoBehaviour {
     public bool frictionEnabled;
     public float frictionAmount;
     public bool gravityEnabled;
-    public float gravityAmount = 5;
+    public float gravityAmount = 10;
     public float bounceAmount;
     public bool collisionEnabled = true;
     public float radius;

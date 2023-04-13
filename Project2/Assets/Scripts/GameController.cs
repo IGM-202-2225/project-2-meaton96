@@ -56,6 +56,7 @@ public class GameController : MonoBehaviour {
         }
         if (Input.GetKeyDown(KeyCode.Space)) {
             Bullet bullet = Instantiate(bulletPrefab, Camera.main.transform.position, Quaternion.identity).GetComponent<Bullet>();
+            bullet.transform.localScale = new Vector3(2, 2, 2);
             bullet.Fire(Camera.main.transform.forward, agents, this);
         }
         if (Input.GetKeyDown(KeyCode.F2)) {

@@ -11,7 +11,7 @@ public class Bullet : PhysicsObject {
     protected override void Awake() {
         base.Awake();
         objects = new();
-        firePower = 10000;
+        firePower = 2500;
         mass = .5f;
         radius = .45f;
 
@@ -54,18 +54,18 @@ public class Bullet : PhysicsObject {
     public void ResolveCollision() {
         foreach (Agent obj in objects) {
             if (obj.CheckCollision(sCollider)) {
-                obj.ApplyForce(1000 * firePower * direction);
+                obj.ApplyForce(firePower / 5f * direction);
                 obj.alive = false;
                 Destroy(gameObject);
             }
         }
         //not going to work
-        foreach (TreeObject tree in gameController.GetChunk(transform.position).trees) {
-            if (tree.CheckCollision(sCollider)) {
-                tree.ApplyForce(1000 * firePower * direction);
-                Destroy(gameObject);
-            }
-        }
+        //foreach (TreeObject tree in gameController.GetChunk(transform.position).trees) {
+        //    if (tree.CheckCollision(sCollider)) {
+        //        tree.ApplyForce(1000 * firePower * direction);
+        //        Destroy(gameObject);
+        //    }
+        //}
     }
 
 

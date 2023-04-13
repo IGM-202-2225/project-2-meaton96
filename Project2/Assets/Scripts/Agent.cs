@@ -32,9 +32,9 @@ public class Agent : PhysicsObject {
 
     public float runAwayTimer, runAwayTime;
 
-    private const float CIRCLE_DISTANCE = 1f, CIRCLE_RADIUS = 2f, ANGLE_CHANGE = 0.523f, SHORE_CHECK_RADIUS = 10f, SHORE_CHECK_ANGLE = .1f;
+    private const float CIRCLE_DISTANCE = 1f, CIRCLE_RADIUS = 2f, ANGLE_CHANGE = 0.275f, SHORE_CHECK_RADIUS = 10f, SHORE_CHECK_ANGLE = .1f;
     private float wanderAngle = 0f;
-
+    private float stayInBoundsPower = 10f;
     private float seperationDistance = 150f, minSeperationDistance = 100f;
 
     private const float SEA_LEVEL = 27f;
@@ -66,8 +66,6 @@ public class Agent : PhysicsObject {
         base.Awake();
         avoidAgents = new();
         targetAgents = new();
-        //assign ground (temp)
-        //ground = GameObject.FindWithTag("Ground");
         //assign game controller pointer
         gameController = GameObject.FindWithTag("GameController").GetComponent<GameController>();
         animator = GetComponent<Animator>();
@@ -81,14 +79,20 @@ public class Agent : PhysicsObject {
 
     }
     protected override void UpdateSphereCollider() {
-        sCollider.Update(transform.position);
+        foreach (List<SimpleSphereCollider> colliderLists in colliders) {
+            colliderLists.ForEach(collider => collider.Update(transform.position));
+        }
 
     }
+    //keeps the agent from going into the water by preventing it from going below sea level
     protected void StayInBounds() {
         if (transform.position.y <= SEA_LEVEL) {
-            ApplyForce(4 * movingPower * GetVectorPerpToShore());
+            ApplyForce(stayInBoundsPower * movingPower * GetVectorPerpToShore());
         }
     }
+    //checks all around the agent in a radius of SHORE_CHECK_RADIUS
+    //gets every point on the circle seperated by angle SHORE_CHECK_ANGLE
+    //takes the highest point and returns a vector pointing from the agent to the highest point
     private Vector3 GetVectorPerpToShore() {
         float max = -1;
         float maxAngle = 0;
@@ -104,6 +108,8 @@ public class Agent : PhysicsObject {
         
 
     }
+    //seperates from all nearby (seperationDistance) agents by apply a force to eachother
+    //force is proportional to the distance with maximum force applied nearest to the agent
     void Seperate() {
         List<Agent> agentsInRange = avoidAgents.FindAll(agent => Vector3.Distance(agent.transform.position, transform.position) < seperationDistance);
         
@@ -142,7 +148,7 @@ public class Agent : PhysicsObject {
                         break;
                     case State.wandering:
                         Wander();
-                     //   Seperate();
+                        Seperate();
                         break;
                     case State.fleeing:
                         Flee();
@@ -191,20 +197,21 @@ public class Agent : PhysicsObject {
             velocity = Vector3.zero;
         }
     }
+    
     protected virtual void Flee() {
         if (target == null) {
             state = State.wandering;
             return;
         }
-        Vector3 desiredVelocity;// = (transform.position - target.transform.position).normalized * movingPower / 4f;
+        Vector3 desiredVelocity;
 
         float xV = transform.position.x - target.position.x;
-        float zV = target.position.z - target.position.z;
-        desiredVelocity = new Vector3(xV, 0, zV).normalized * 100;
-        Vector3 curVelocity = new Vector3(velocity.x, 0f, velocity.z);
+        float zV = transform.position.z - target.position.z;
+        desiredVelocity = new Vector3(xV, velocity.y, zV).normalized * 10;
+        
 
 
-        ApplyForce((desiredVelocity - curVelocity) * movingPower);
+        ApplyForce((desiredVelocity - velocity) * movingPower);
         
     }
 
@@ -258,7 +265,7 @@ public class Agent : PhysicsObject {
             }
             
         }
-        //avoidAgents.ForEach(agent => Debug.Log(agent.ToString()));
+        
     }
     //do nothing, 50/50 chance every stateSwitchTimer to swap between idle and wander
     public void Idle() {
