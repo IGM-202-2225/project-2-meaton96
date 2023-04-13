@@ -682,13 +682,14 @@ MonoBehaviour:
   frictionAmount: 2000
   gravityEnabled: 1
   gravityAmount: 5
-  timer: 0
   bounceAmount: 0
   collisionEnabled: 1
   radius: 0
-  ground: {fileID: 0}
-  movingPower: 1000
-  isActive: 0
+  terrain: {fileID: 0}
+  movingPower: 5000
+  isActive: 1
+  runAwayTimer: 0
+  runAwayTime: 0
   alive: 1
   _id: 0
   state: 0

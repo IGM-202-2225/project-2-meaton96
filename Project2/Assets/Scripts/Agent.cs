@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Agent : PhysicsObject {
-    public GameObject ground;                                           //temporary reference to ground object, will change to terrain later
+    //public GameObject ground;                                           //temporary reference to ground object, will change to terrain later
     protected Animator animator;                                        //pointer to animator to change animations
     protected float wanderTimer, wanderSwitchDirCooldown;               //timers for tracking wandering around
     [SerializeField] protected float movingPower;                       //how strong in Newtons? to call ApplyForce
@@ -18,7 +17,7 @@ public class Agent : PhysicsObject {
     protected State nextState;                                          //holder to move to another state after a turn is completed
     //protected float runningSpeed = 3f;                                  
     protected float maxSpeed;                                           //speed cap, velocity magnitude will not exceed this value
-    protected Transform runningFrom;                                      //an initial position to run away from, this may be a sound (gunshot or something from player) 
+    //protected Transform runningFrom;                                      //an initial position to run away from, this may be a sound (gunshot or something from player) 
                                                                           //or a sighting of another actor from the avoidAgents list
     protected float maxRunAwayDistance;                                 //how far away from the initial runningFrom position to get before going back to wandering
     protected float avoidanceDistance;                                  //how close to get to another agent before triggering a seperation 
@@ -33,7 +32,12 @@ public class Agent : PhysicsObject {
 
     public float runAwayTimer, runAwayTime;
 
+    private const float CIRCLE_DISTANCE = 1f, CIRCLE_RADIUS = 2f, ANGLE_CHANGE = 0.523f, SHORE_CHECK_RADIUS = 10f, SHORE_CHECK_ANGLE = .1f;
+    private float wanderAngle = 0f;
 
+    private float seperationDistance = 150f, minSeperationDistance = 100f;
+
+    private const float SEA_LEVEL = 27f;
 
     public bool alive = true;
     public int _id;
@@ -42,7 +46,7 @@ public class Agent : PhysicsObject {
     public enum State {
         idle,
         wandering,
-        runningAway,
+        fleeing,
         chasing,
         hurt,
         turning
@@ -63,7 +67,7 @@ public class Agent : PhysicsObject {
         avoidAgents = new();
         targetAgents = new();
         //assign ground (temp)
-        ground = GameObject.FindWithTag("Ground");
+        //ground = GameObject.FindWithTag("Ground");
         //assign game controller pointer
         gameController = GameObject.FindWithTag("GameController").GetComponent<GameController>();
         animator = GetComponent<Animator>();
@@ -72,12 +76,44 @@ public class Agent : PhysicsObject {
         //activate movement logic
         isActive = true;
         alive = true;
-
+        frictionEnabled = true;
+        state = State.wandering;
 
     }
     protected override void UpdateSphereCollider() {
         sCollider.Update(transform.position);
 
+    }
+    protected void StayInBounds() {
+        if (transform.position.y <= SEA_LEVEL) {
+            ApplyForce(4 * movingPower * GetVectorPerpToShore());
+        }
+    }
+    private Vector3 GetVectorPerpToShore() {
+        float max = -1;
+        float maxAngle = 0;
+        for (float angle = 0; angle < Mathf.PI * 2; angle += SHORE_CHECK_ANGLE) {
+            float x = transform.position.x + Mathf.Cos(angle) * SHORE_CHECK_RADIUS;
+            float z = transform.position.z + Mathf.Sin(angle) * SHORE_CHECK_RADIUS;
+            if (terrain.SampleHeight(new Vector3(x, 0, z)) > max) {
+                max = terrain.SampleHeight(new Vector3(x, 0, z));
+                maxAngle = angle;
+            }
+        }
+        return new Vector3(Mathf.Cos(maxAngle), 0f, Mathf.Sin(maxAngle));
+        
+
+    }
+    void Seperate() {
+        List<Agent> agentsInRange = avoidAgents.FindAll(agent => Vector3.Distance(agent.transform.position, transform.position) < seperationDistance);
+        
+        foreach(Agent agent in agentsInRange) {
+            Vector3 dir = agent.transform.position - transform.position;
+            dir = dir.normalized * -1;
+            float distance = Vector3.Distance(agent.transform.position, transform.position);
+            float percentForce = distance / (seperationDistance - minSeperationDistance);
+            ApplyForce(percentForce * movingPower * 2 * dir);
+        }
     }
     public override void Update() {
         //call physics object update
@@ -94,6 +130,11 @@ public class Agent : PhysicsObject {
                 else {
                     pollTimer += Time.deltaTime;
                 }
+                if (velocity.magnitude > 0) {
+                    transform.rotation = Quaternion.LookRotation(direction);
+                }
+                
+
                 //movement behaviour
                 switch (state) {
                     case State.idle:
@@ -101,24 +142,13 @@ public class Agent : PhysicsObject {
                         break;
                     case State.wandering:
                         Wander();
+                     //   Seperate();
                         break;
-                    case State.runningAway:
-                        if (runAwayTimer >= runAwayTime) {
-                            state = State.wandering;
-                            runAwayTimer = 0;
-                        }
-                        else {
-                            //runs away from runningFrom transform position
-                            Vector3 pos = transform.position - runningFrom.position;
-                            pos.y = 0;
-                            Quaternion lookRotation =  Quaternion.LookRotation(pos);
-                            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f);
-                            MoveForward(movingPower);
-                            runAwayTimer += Time.deltaTime;
-                        }
+                    case State.fleeing:
+                        Flee();
                         break;
                     case State.chasing:
-                        ChaseTarget();
+                        //ChaseTarget();
                         break;
                     case State.turning:
                         //turns the agent
@@ -134,6 +164,8 @@ public class Agent : PhysicsObject {
                         break;
 
                 }
+                StayInBounds();
+                
             }
 
 
@@ -149,11 +181,31 @@ public class Agent : PhysicsObject {
         }
 
     }
+    public void FleeTarget(Transform transform) {
+        target = transform;
+        state = State.fleeing;
+    }
     public void ToggleAI() {
         isActive = !isActive;
         if (!isActive) {
             velocity = Vector3.zero;
         }
+    }
+    protected virtual void Flee() {
+        if (target == null) {
+            state = State.wandering;
+            return;
+        }
+        Vector3 desiredVelocity;// = (transform.position - target.transform.position).normalized * movingPower / 4f;
+
+        float xV = transform.position.x - target.position.x;
+        float zV = target.position.z - target.position.z;
+        desiredVelocity = new Vector3(xV, 0, zV).normalized * 100;
+        Vector3 curVelocity = new Vector3(velocity.x, 0f, velocity.z);
+
+
+        ApplyForce((desiredVelocity - curVelocity) * movingPower);
+        
     }
 
 
@@ -198,7 +250,7 @@ public class Agent : PhysicsObject {
     //updates the avoid agents list with all types of agents the agent is supposed to be avoiding
     protected virtual void UpdateAgentLists() {
         avoidAgents = new();
-        foreach (Agent agent in gameController.agents.Cast<Agent>()) {
+        foreach (Agent agent in gameController.agents) {
             if (agent.Equals(this)) continue;
 
             if (agent.CompareTag(tag)) {
@@ -210,15 +262,7 @@ public class Agent : PhysicsObject {
     }
     //do nothing, 50/50 chance every stateSwitchTimer to swap between idle and wander
     public void Idle() {
-        foreach (Agent agent in avoidAgents) {
-            float dist = Vector3.Distance(agent.transform.position, transform.position);
-
-            //trigger a run away from state if this agent gets to close to one in its avoid list
-            if (dist < avoidanceDistance) {
-                RunAwayFrom(agent.transform);
-                return;
-            }
-        }
+        
         velocity = Vector3.zero;
         if (stateTimer > stateSwitchTimer) {
             stateTimer = 0f;
@@ -242,65 +286,73 @@ public class Agent : PhysicsObject {
 
     }
     //will move forward and continually rotate to look at the taret transform
-    private void ChaseTarget() {
-        transform.LookAt(target, Vector3.up);
-        MoveForward(movingPower * 2);
-    }
+    //private void ChaseTarget() {
+    //    transform.LookAt(target, Vector3.up);
+    //    MoveForward(movingPower * 2);
+    //}
     //run away from the runAwayFrom position
     //will turn directly away from and set the state to run away
-    public void RunAwayFrom(Transform runAwayFrom) {
+    //public void RunAwayFrom(Transform runAwayFrom) {
         
-        runningFrom = runAwayFrom;
-        TurnTo(Quaternion.LookRotation(new Vector3(-runAwayFrom.position.x, 0f, -runAwayFrom.position.z)));
-        nextState = State.runningAway;
-    }
+    //    runningFrom = runAwayFrom;
+    //    TurnTo(Quaternion.LookRotation(new Vector3(-runAwayFrom.position.x, 0f, -runAwayFrom.position.z)));
+    //    nextState = State.fleeing;
+    //}
     //move forawrd by the specified multiplier
-    private void MoveForward(float amount) {
-        ApplyForce(transform.forward * amount);
-    }
+    
     //wanders around
     //changes direction randomly every so often
+    //protected virtual void Wander() {
+
+
+    //    //50/50 to start idling or continue wandering
+    //    if (stateTimer > stateSwitchTimer) {
+    //        stateTimer = 0f;
+    //        if (UnityEngine.Random.Range(0, 2) == 0) {
+    //            state = State.idle;
+    //        }
+    //    }
+    //    else
+    //        stateTimer += Time.deltaTime;
+
+    //    //randomly change direction
+    //    if (wanderTimer >= wanderSwitchDirCooldown) {
+    //        Vector3 currentRotation = transform.rotation.eulerAngles;
+    //        wanderTimer = 0;
+    //        nextState = State.wandering;
+    //        TurnTo(
+    //            Quaternion.Euler(
+    //                new Vector3(
+    //                    currentRotation.x,
+    //                    UnityEngine.Random.Range(0f, 360f),
+    //                    currentRotation.z)));
+    //    }
+    //    wanderTimer += Time.deltaTime;
+
+    //    MoveForward(movingPower);
+
+
+
+
+    //}
     protected virtual void Wander() {
-        foreach (Agent agent in avoidAgents) {
-            float dist = Vector3.Distance(agent.transform.position, transform.position);
+        
+        Vector3 circleCenter;
+        circleCenter = new Vector3(velocity.x, velocity.y, velocity.z).normalized * CIRCLE_DISTANCE;
 
-            //trigger a run away from state if this agent gets to close to one in its avoid list
-            if (dist < avoidanceDistance) {
-                RunAwayFrom(agent.transform);
-                return;
-            }
-        }
+        Vector3 displacement = Vector3.down * CIRCLE_RADIUS;
 
-        //50/50 to start idling or continue wandering
-        if (stateTimer > stateSwitchTimer) {
-            stateTimer = 0f;
-            if (UnityEngine.Random.Range(0, 2) == 0) {
-                state = State.idle;
-            }
-        }
-        else
-            stateTimer += Time.deltaTime;
+        displacement.x = Mathf.Cos(wanderAngle) * displacement.magnitude;
+        displacement.z = Mathf.Sin(wanderAngle) * displacement.magnitude;
 
-        //randomly change direction
-        if (wanderTimer >= wanderSwitchDirCooldown) {
-            Vector3 currentRotation = transform.rotation.eulerAngles;
-            wanderTimer = 0;
-            nextState = State.wandering;
-            TurnTo(
-                Quaternion.Euler(
-                    new Vector3(
-                        currentRotation.x,
-                        UnityEngine.Random.Range(0f, 360f),
-                        currentRotation.z)));
-        }
-        wanderTimer += Time.deltaTime;
+        wanderAngle += UnityEngine.Random.Range(-ANGLE_CHANGE, ANGLE_CHANGE);
 
-        MoveForward(movingPower);
+        Vector3 wanderForce = displacement + circleCenter;
 
-
-
+        ApplyForce(wanderForce * movingPower);
 
     }
+
     //sets up agent turning to direction rotation
     protected virtual void TurnTo(Quaternion direction) {
 

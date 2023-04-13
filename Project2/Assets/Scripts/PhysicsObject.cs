@@ -45,8 +45,7 @@ public class PhysicsObject : MonoBehaviour {
         velocity += acceleration * Time.deltaTime;
         transform.position += velocity * Time.deltaTime;
 
-        direction = velocity.normalized;
-
+        direction = new Vector3(velocity.x, 0f, velocity.z);
         acceleration = Vector3.zero;
 
     }
@@ -110,6 +109,7 @@ public class PhysicsObject : MonoBehaviour {
         ApplyForce(friction);
     }
     public void ApplyGravity() {
+        
         acceleration += new Vector3(0f, -gravityAmount, 0f);
     }
 }

@@ -1,4 +1,3 @@
-using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -24,7 +23,7 @@ public class GameController : MonoBehaviour {
         MyJsonUtility.ParseAllJson();
 
         var treeList = GameObject.FindGameObjectsWithTag("Synty Tree").ToList();
-        
+
         int numRows = (int)Mathf.Sqrt(numChunks);
         multi = startingPoint * -2 / numRows;
         for (int x = startingPoint; x < numRows; x++) {
@@ -37,16 +36,7 @@ public class GameController : MonoBehaviour {
                 GetChunk(tree.transform.position).trees.Add(tree.GetComponent<TreeObject>());
             }
         }
-        //crashes unity
-        //trees.ForEach(tree => {
-        //    foreach (var chunk in chunks) {
-        //        if (chunk.IsInChunk(tree.transform.position)) {
-        //            chunk.trees.Add(tree);
-        //            trees.Remove(tree);
-        //            continue;
-        //        }
-        //    }
-        //});
+
         agents = new();
 
 
@@ -55,7 +45,7 @@ public class GameController : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
-        foreach (Agent agent in agents.Cast<Agent>()) {
+        foreach (Agent agent in agents) {
             if (!agent.alive) {
                 agents.Remove(agent);
                 break;
@@ -81,6 +71,10 @@ public class GameController : MonoBehaviour {
 
             }
         }
+        if (Input.GetKeyDown(KeyCode.F4)) {
+            if (agents.Count >= 2 && agents[0] != null && agents[1] != null)
+                agents[0].GetComponent<Agent>().FleeTarget(agents[1].transform);
+        }
         if (Input.GetKeyDown(KeyCode.UpArrow)) {
             dinoIndex++;
             if (dinoIndex >= agentPrefabs.Count) { dinoIndex = 0; }
@@ -90,12 +84,12 @@ public class GameController : MonoBehaviour {
             if (dinoIndex < 0) { dinoIndex = agentPrefabs.Count - 1; }
         }
         // Debug.Log(Trex1.state.ToString());  
-        
+
     }
     public Chunk GetChunk(Vector3 pos) {
-        int x = ((int) pos.x - startingPoint) / multi;
-        int z = ((int) pos.z - startingPoint) / multi;
-        
+        int x = ((int)pos.x - startingPoint) / multi;
+        int z = ((int)pos.z - startingPoint) / multi;
+
         return chunks[x + z];
     }
 
