@@ -12,7 +12,7 @@ public class Agent : PhysicsObject {
     protected Quaternion previousRotation;                              //tracking for using linear interpolation to turn the agent
     protected Quaternion nextRotation;
     protected Transform target;                                         //current target, agent will run towards this if in chasing state
-    protected List<Agent> avoidAgents, targetAgents;                    //current world agents to avoid and target depending on tags Carnivore, herbivore ect..
+   // protected List<Agent> avoidAgents, targetAgents;                    //current world agents to avoid and target depending on tags Carnivore, herbivore ect..
     protected float runningSpeedMultiplier;                             //how much faster to run when chasing or running away then when wandering
     protected State nextState;                                          //holder to move to another state after a turn is completed
     //protected float runningSpeed = 3f;                                  
@@ -32,12 +32,14 @@ public class Agent : PhysicsObject {
 
     public float runAwayTimer, runAwayTime;
 
-    private const float CIRCLE_DISTANCE = 1f, CIRCLE_RADIUS = 2f, ANGLE_CHANGE = 0.275f, SHORE_CHECK_RADIUS = 10f, SHORE_CHECK_ANGLE = .1f;
-    private float wanderAngle = 0f;
-    private float stayInBoundsPower = 10f;
-    private float seperationDistance = 150f, minSeperationDistance = 100f;
+    protected const float CIRCLE_DISTANCE = 1f, CIRCLE_RADIUS = 2f, ANGLE_CHANGE = 0.275f, SHORE_CHECK_RADIUS = 10f, SHORE_CHECK_ANGLE = .1f;
+    protected float wanderAngle = 0f;
+    protected float stayInBoundsPower = 10f;
+    protected float seperationDistance = 150f, minSeperationDistance = 100f;
+    protected float pursuePredictTime = 2f;
+    protected const float SEA_LEVEL = 27f;
 
-    private const float SEA_LEVEL = 27f;
+    protected Chunk chunk;
 
     public bool alive = true;
     public int _id;
@@ -49,7 +51,8 @@ public class Agent : PhysicsObject {
         fleeing,
         chasing,
         hurt,
-        turning
+        turning,
+        pursuing
     }
 
     public State state;
@@ -64,20 +67,20 @@ public class Agent : PhysicsObject {
         _id = id++;
         //init lists and arrays
         base.Awake();
-        avoidAgents = new();
-        targetAgents = new();
+       // avoidAgents = new();
+        //targetAgents = new();
         //assign game controller pointer
         gameController = GameObject.FindWithTag("GameController").GetComponent<GameController>();
         animator = GetComponent<Animator>();
         //force scan all actors when created to populate avoid and target lists
-        UpdateAgentLists();
+        //UpdateAgentLists();
         //activate movement logic
         isActive = true;
         alive = true;
         frictionEnabled = true;
-        state = State.wandering;
 
     }
+    protected virtual void Pursue() { }
     protected override void UpdateSphereCollider() {
         foreach (List<SimpleSphereCollider> colliderLists in colliders) {
             colliderLists.ForEach(collider => collider.Update(transform.position));
@@ -111,7 +114,10 @@ public class Agent : PhysicsObject {
     //seperates from all nearby (seperationDistance) agents by apply a force to eachother
     //force is proportional to the distance with maximum force applied nearest to the agent
     void Seperate() {
-        List<Agent> agentsInRange = avoidAgents.FindAll(agent => Vector3.Distance(agent.transform.position, transform.position) < seperationDistance);
+        List<PhysicsObject> agentsInRange = chunk.GetAgentsOfType(
+            new []{ tag }).
+            FindAll(
+            agent => Vector3.Distance(agent.transform.position, transform.position) < seperationDistance);
         
         foreach(Agent agent in agentsInRange) {
             Vector3 dir = agent.transform.position - transform.position;
@@ -128,14 +134,7 @@ public class Agent : PhysicsObject {
 
             UpdateSphereCollider();
             if (isActive) {
-                //populate actor lists every so often
-                if (pollTimer > agentPollRate) {
-                    pollTimer = 0;
-                    UpdateAgentLists();
-                }
-                else {
-                    pollTimer += Time.deltaTime;
-                }
+                
                 if (velocity.magnitude > 0) {
                     transform.rotation = Quaternion.LookRotation(direction);
                 }
@@ -182,7 +181,6 @@ public class Agent : PhysicsObject {
             }
         }
         else {
-            frictionEnabled = true;
             animator.SetTrigger("Die");
         }
 
@@ -255,18 +253,18 @@ public class Agent : PhysicsObject {
         return false;
     }
     //updates the avoid agents list with all types of agents the agent is supposed to be avoiding
-    protected virtual void UpdateAgentLists() {
-        avoidAgents = new();
-        foreach (Agent agent in gameController.agents) {
-            if (agent.Equals(this)) continue;
+    //protected virtual void UpdateAgentLists() {
+    //    avoidAgents = new();
+    //    foreach (Agent agent in gameController.agents) {
+    //        if (agent.Equals(this)) continue;
 
-            if (agent.CompareTag(tag)) {
-                avoidAgents.Add(agent);
-            }
-            
-        }
-        
-    }
+    //        if (agent.CompareTag(tag)) {
+    //            avoidAgents.Add(agent);
+    //        }
+
+    //    }
+
+    //}
     //do nothing, 50/50 chance every stateSwitchTimer to swap between idle and wander
     public void Idle() {
         
@@ -277,6 +275,9 @@ public class Agent : PhysicsObject {
         }
         else
             stateTimer += Time.deltaTime;
+    }
+    public void UpdateChunk(Chunk chunk) {
+        this.chunk = chunk;
     }
     //increments the state
     //only for testing
@@ -357,6 +358,11 @@ public class Agent : PhysicsObject {
         Vector3 wanderForce = displacement + circleCenter;
 
         ApplyForce(wanderForce * movingPower);
+
+    }
+    public virtual void Seek() {
+        Vector3 desiredVelocity = (target.position - transform.position).normalized * maxSpeed;
+        ApplyForce((desiredVelocity - velocity) * movingPower);
 
     }
 

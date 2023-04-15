@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.ShaderKeywordFilter;
 using UnityEngine;
 
 public class GameController : MonoBehaviour {
@@ -15,20 +16,26 @@ public class GameController : MonoBehaviour {
     [SerializeField] private GameObject bulletPrefab;
     public int dinoIndex = 0;
     List<TreeObject> trees = new();
-    public List<Chunk> chunks = new();
+    public Chunk[][] chunks = new Chunk[8][];
+    private float updateTimer, updateTime;
     // Start is called before the first frame update
     void Start() {
+        updateTime = 5f;
 
         MyJsonUtility.SetJsonText(agentDataJson.text);
         MyJsonUtility.ParseAllJson();
+
+        for (int x = 0; x < chunks.Length; x++) {
+            chunks[x] = new Chunk[chunks.Length];
+        }
 
         var treeList = GameObject.FindGameObjectsWithTag("Synty Tree").ToList();
 
         int numRows = (int)Mathf.Sqrt(numChunks);
         multi = startingPoint * -2 / numRows;
-        for (int x = startingPoint; x < numRows; x++) {
-            for (int z = startingPoint; z < numRows; z++) {
-                chunks.Add(new Chunk(x * multi, z * multi));
+        for (int x = 0; x < chunks.Length; x++) {
+            for (int z = 0; z < chunks[x].Length; z++) {
+                chunks[x][z] = new Chunk(this, x, z);
             }
         }
         foreach (var tree in treeList) {
@@ -43,8 +50,23 @@ public class GameController : MonoBehaviour {
 
     }
 
+
     // Update is called once per frame
     void Update() {
+
+        //causing exception chunks[x][y] is null
+        if (updateTime >= updateTimer) {
+            updateTimer = 0;
+            for (int x = 0; x < chunks.Length; x++) {
+                for (int y = 0; y < chunks[0].Length; y++) {
+                    Debug.Log(chunks[x][y] == null);
+                    chunks[x][y].Update();
+                }
+            }
+        }
+        else {
+            updateTime += Time.deltaTime;
+        }
         foreach (Agent agent in agents) {
             if (!agent.alive) {
                 agents.Remove(agent);
@@ -91,7 +113,7 @@ public class GameController : MonoBehaviour {
         int x = ((int)pos.x - startingPoint) / multi;
         int z = ((int)pos.z - startingPoint) / multi;
 
-        return chunks[x + z];
+        return chunks[x][z];
     }
 
 }
