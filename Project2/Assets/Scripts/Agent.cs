@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Agent : PhysicsObject {
@@ -35,7 +37,7 @@ public class Agent : PhysicsObject {
     protected const float CIRCLE_DISTANCE = 1f, CIRCLE_RADIUS = 2f, ANGLE_CHANGE = 0.275f, SHORE_CHECK_RADIUS = 10f, SHORE_CHECK_ANGLE = .1f;
     protected float wanderAngle = 0f;
     protected float stayInBoundsPower = 10f;
-    protected float seperationDistance = 150f, minSeperationDistance = 100f;
+    //protected float seperationDistance = 150f, minSeperationDistance = 100f;
     protected float pursuePredictTime = 2f;
     protected const float SEA_LEVEL = 27f;
 
@@ -64,13 +66,15 @@ public class Agent : PhysicsObject {
 
 
     protected override void Awake() {
+        gameController = GameObject.FindWithTag("GameController").GetComponent<GameController>();
+        chunk = gameController.GetChunk(transform.position);
         _id = id++;
         //init lists and arrays
         base.Awake();
        // avoidAgents = new();
         //targetAgents = new();
         //assign game controller pointer
-        gameController = GameObject.FindWithTag("GameController").GetComponent<GameController>();
+        
         animator = GetComponent<Animator>();
         //force scan all actors when created to populate avoid and target lists
         //UpdateAgentLists();
@@ -117,22 +121,24 @@ public class Agent : PhysicsObject {
         List<PhysicsObject> agentsInRange = chunk.GetAgentsOfType(
             new []{ tag }).
             FindAll(
-            agent => Vector3.Distance(agent.transform.position, transform.position) < seperationDistance);
+            agent => Vector3.Distance(agent.transform.position, transform.position) < maxRunAwayDistance);
         
         foreach(Agent agent in agentsInRange) {
             Vector3 dir = agent.transform.position - transform.position;
             dir = dir.normalized * -1;
             float distance = Vector3.Distance(agent.transform.position, transform.position);
-            float percentForce = distance / (seperationDistance - minSeperationDistance);
+            float percentForce = distance / (maxRunAwayDistance - avoidanceDistance);
             ApplyForce(percentForce * movingPower * 2 * dir);
-        }
+        }   
     }
     public override void Update() {
         //call physics object update
         base.Update();
         if (alive) {
 
+
             UpdateSphereCollider();
+            CheckCollisionWithOtherAgents();
             if (isActive) {
                 
                 if (velocity.magnitude > 0) {
@@ -152,8 +158,8 @@ public class Agent : PhysicsObject {
                     case State.fleeing:
                         Flee();
                         break;
-                    case State.chasing:
-                        //ChaseTarget();
+                    case State.pursuing:
+                        Pursue();
                         break;
                     case State.turning:
                         //turns the agent
@@ -213,7 +219,6 @@ public class Agent : PhysicsObject {
         
     }
 
-
     //assign class data fields that determine movement logic based on the passed in class name
     protected void AssignClassData(string className) {
         for (int x = 0; x < colliders.Length; x++) {
@@ -243,6 +248,7 @@ public class Agent : PhysicsObject {
         state = State.wandering;
         stateSwitchTimer = 13f;
         runAwayTime = 7f;
+        
     }
     //returns true if the agent has a tag that is in the list of target tags this agent has
     protected bool IsATargetTag(Agent agent) {
@@ -374,7 +380,44 @@ public class Agent : PhysicsObject {
         velocity = Vector3.zero;
         state = State.turning;
     }
+    protected void CheckCollisionWithOtherAgents() {
+        foreach (Agent agent in chunk.agents) {
+            if (agent == this) continue;
+            if (agent.CheckCollisionByLevel(0, colliders[0][0])) {
+                foreach (SimpleSphereCollider otherAgentCollider in agent.colliders[1]) {
+                    if (CheckCollisionByLevel(1, otherAgentCollider)) {
+                        if (agent.CompareTag(tag)) {
+                            agent.ApplyForce(velocity * mass);
+                        }
+                        else {
+                            if (IsATargetTag(agent)) {
+                                velocity = Vector3.zero;
+                                agent.velocity = Vector3.zero;
+                                target = agent.transform;
+                                TurnTo(Quaternion.LookRotation(target.position));
+                                nextState = State.idle;
+                                animator.SetTrigger("Eat");
+                                return;
+                            }else {
+                                //??
+                            }
+                        }
 
+                    }
+                }
+            }
+        }
+    }
+    public void KillTarget() {
+        Agent agent = target.GetComponent<Agent>();
+        agent.animator.SetTrigger("Die");
+        agent.alive = false;
+        agent.isActive = false;
+        chunk.RemoveAgentFromChunk(agent);
+        target = null;
+        
+        state = State.idle;
+    } 
     //check each level of collision against other SphereCollider
     public override bool CheckCollision(SimpleSphereCollider other) {
         if (colliders[0] == null)
@@ -402,5 +445,6 @@ public class Agent : PhysicsObject {
         }
         return false;
     }
+    
 
 }

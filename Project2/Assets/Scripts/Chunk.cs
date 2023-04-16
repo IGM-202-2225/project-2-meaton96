@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine;
 
 public class Chunk {
-    public const float WIDTH = 64f;
+    public const float WIDTH = 256f;
     public Vector3 bottomLeft;
     public List<TreeObject> trees;
     public List<Agent> agents;
@@ -13,6 +13,7 @@ public class Chunk {
 
     public int x, z;
     public Chunk(GameController gc, int x, int z) {
+        gameController = gc;
         bottomLeft = new Vector3(
             gameController.startingPoint + x * gameController.multi,
             0,
@@ -28,22 +29,29 @@ public class Chunk {
             && pos.z > bottomLeft.z && pos.y < bottomLeft.y + WIDTH;
     }
     public void Update() {
-
+        agents = new();
         agents = gameController.agents.Where(agent => IsInChunk(agent.transform.position)).Cast<Agent>().ToList();
         agents.ForEach(agent => agent.UpdateChunk(this));
 
 
     }
+    public void RemoveAgentFromChunk(Agent agent) {
+        agents.Remove(agent);
+    }
     public List<PhysicsObject> GetAgentsOfType(IEnumerable<string> tags) {
 
 
 
+        List<PhysicsObject> allAgents = new();
+        foreach (string t in tags) {
 
-        List<PhysicsObject> agents = new();
-        foreach (string tag in tags) {
-            agents.AddRange(agents.Where(a => a.CompareTag(tag)));
+            
+            allAgents.AddRange(agents.Where(a => a.CompareTag(t)));
+
+
         }
-        return agents;
+        
+        return allAgents;
 
     }
     public List<Chunk> GetAdjacentChunks() {
@@ -53,9 +61,12 @@ public class Chunk {
                 try {
                     adjacentChunks.Add(gameController.chunks[i][j]);
                 }
-                catch (IndexOutOfRangeException) { }
+                catch (IndexOutOfRangeException) {
+                    continue;
+                }
             }
         }
+        Debug.Log(adjacentChunks.Count);
         return adjacentChunks;
     }
 

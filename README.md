@@ -23,9 +23,9 @@ Player can explode trees to adjust dinosaur pathing behaviors
     -   Space bar to fire a bullet
     -   Bullets can interact with dinosaurs and trees, bullets kills dinosaurs and also will knock trees over
 
-## Trex
+## T-rex
 
-A carniverous agent that will wander around and hunt smaller creatures (NYI)
+A carniverous agent that will wander around and hunt smaller creatures
 
 ### Wander
 
@@ -33,26 +33,25 @@ A carniverous agent that will wander around and hunt smaller creatures (NYI)
 
 #### Steering Behaviors
 
-- Moves forward for a bit then changes to a random direction
-   - tracks nearby agents and can change to move away or chase behaviours
-- Obstacles - NYI
-- Seperation - currently seperates from any other agent with the "Carnivore" tag
+*  Wander movement using the circle method with small wander angle changes
+   *  tracks nearby agents to start pursuing
+*  Obstacles - NYI
+*  Seperation - Will seperate from any agent with the same tag
    
 #### State Transistions
 
-- state is transitioned to after seperating, chasing, or being idle
-   - When this agent gets far enough away from other avoided agents it will default to wander
-   - When this agent has idled for a period of time it will transiton back to wandering
+-  default state, will be transitioned to after exiting another state
+   -  Will transition back to this state if the pursuit/seek/flee target becomes null
    
-### Chase
+### Pursue
 
 **Objective:** moves towards a target agent
 
 #### Steering Behaviors
 
-- Needs to be updated
-- Obstacles - NYI
-- Seperation - Not implemented in this state, supposedly 2 of the same agent could chase a single target causing them to be close to eachother, however seperation check comes before any other state transition checks therefore 2 seperating agents should never be close enough to hunt the same agent
+-  Steers towards a target agent by predicting its movement by up to 2 seconds. The time is reduced as it gets closer.
+-  Obstacles - NYI
+-  Seperation - Not implemented in this state. Agent will ignore everything except pursuing its target.
    
 #### State Transistions
 
@@ -64,30 +63,27 @@ A small herbivore dino, faster and more nimble than the TRex
 
 ### Wander
 
-**Objective:** Same as Trex but speed and turn timings are different
+**Objective:** Move around the game world randomly
 
 #### Steering Behaviors
 
-- Moves forward for a bit then changes to a random direction
-   - tracks nearby agents and can change to run away behavior
+- Wander movement using the circle method with small wander angle changes
 - Obstacles - NYI
-- Seperation - Any agent of the same type, will implement running from carnivores
+- Seperation - Any agent of the same type
    
 #### State Transistions
 
-- state is transitioned to after seperating, chasing, or being idle
-   - When this agent gets far enough away from other avoided agents it will default to wander
-   - When this agent has idled for a period of time it will transiton back to wandering
+- currently the only state for this agent
    
-### NYI
+### Flee
 
-**Objective:** NYI
+**Objective:** Run away from a target agent
 
 #### Steering Behaviors
 
-- NYI
-- NYI
-- Seperation - NYI
+- uses fleeing logic to move away from a target transform
+- Obstacles - NYI
+- Seperation - Any agent of the same type
    
 #### State Transistions
 
@@ -103,15 +99,16 @@ A small herbivore dino, faster and more nimble than the TRex
 
 ## Make it Your Own
 
--3D game with terrain generated using unity asset store generator
-	- all colliders have been removed, only thing used from this is grabbing the height of the terrain from the terrain object and using that as ground
-	- Physics object child script has been added to all of the trees
--Extended player interactions
-	- eventually plan to create a small game where you can go around and hunt dinosaurs with an RPG, and maybe the dinos come to eat you, might play around with adding extra objectives depending on time allowances
+-  3D game with terrain generated using unity asset store generator
+	-  all colliders have been removed, only thing used from this is grabbing the height of the terrain from the terrain object and using that as ground
+	-  Physics object child script has been added to all of the trees
+-  Extended player interactions
+	-  eventually plan to create a small game where you can go around and hunt dinosaurs with an RPG, and maybe the dinos come to eat you, might play around with adding extra objectives depending on time allowances
 
 ## Known Issues
 
-Tree hitbox is bugged
+-  Tree hitbox is bugged and is disabled (v0.0.2)
+-  T-rex successfully completing a hunt does not correctly play the death animation of the small dino agent (v0.0.2)
 
 ### Requirements not completed
 

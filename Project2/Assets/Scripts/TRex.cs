@@ -1,26 +1,29 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class TRex : Agent {
 
-    public float huntDistance = 100f;
-
+    public float huntDistance = 500f;
+    private const float DISTANCE_TO_STOP_PREDICT = 4f;
     protected override void Awake() {
 
         AssignClassData("trex");
-        targetTags = new(new string[] { "SmallHerbivore", "LargeHerbivore", "SmallCarnivore", "Player" });
+        targetTags = new(new string[] { "SmallHerbivore", "LargeHerbivore", "SmallCarnivore" });
         base.Awake();
     }
 
     protected override void Wander() {
-        
+
         if (pollTimer > agentPollRate) {
             pollTimer = 0;
-            var nearbyTargetAgents = chunk.
-                GetAgentsOfType(targetTags).
-                Where(agent => Vector3.Distance(transform.position, agent.transform.position) < huntDistance).ToList();
+            var targetAgents = chunk.
+                GetAgentsOfType(targetTags);
+
+
+            var nearbyTargetAgents = targetAgents.Where(agent => Vector3.Distance(transform.position, agent.transform.position) < huntDistance).ToList();
 
             if (nearbyTargetAgents.Any()) {
                 int index = Random.Range(0, nearbyTargetAgents.Count());
@@ -39,9 +42,15 @@ public class TRex : Agent {
             state = State.wandering;
             return;
         }
-        
-        Vector3 pursuePos = transform.position + transform.gameObject.GetComponent<PhysicsObject>().velocity * pursuePredictTime;
+
+        float distance = Vector3.Distance(transform.position, target.position);
+        Vector3 pursuePos = target.position + target.gameObject.GetComponent<PhysicsObject>().velocity *
+
+            (pursuePredictTime * (-(4 - distance) / distance));
+
         Vector3 desiredVelocity = (pursuePos - transform.position).normalized * maxSpeed;
+
+
         ApplyForce((desiredVelocity - velocity) * movingPower);
     }
 

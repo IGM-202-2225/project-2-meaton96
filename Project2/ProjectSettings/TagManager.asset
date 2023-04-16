@@ -13,6 +13,9 @@ TagManager:
   - Synty Small Farm
   - PW - Nature
   - Tree
+  - SmallHerbivore
+  - LargeHerbivore
+  - SmallCarnivore
   layers:
   - Default
   - TransparentFX

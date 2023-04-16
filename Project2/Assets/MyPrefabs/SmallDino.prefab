@@ -1078,7 +1078,7 @@ GameObject:
   - component: {fileID: 3254414167314250779}
   m_Layer: 0
   m_Name: SmallDino
-  m_TagString: Untagged
+  m_TagString: SmallHerbivore
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1141,13 +1141,14 @@ MonoBehaviour:
   frictionAmount: 2000
   gravityEnabled: 1
   gravityAmount: 5
-  timer: 0
   bounceAmount: 0
   collisionEnabled: 1
   radius: 0
-  ground: {fileID: 0}
+  terrain: {fileID: 0}
   movingPower: 300
   isActive: 0
+  runAwayTimer: 0
+  runAwayTime: 0
   alive: 1
   _id: 0
   state: 0

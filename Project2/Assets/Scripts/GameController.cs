@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.ShaderKeywordFilter;
 using UnityEngine;
 
 public class GameController : MonoBehaviour {
@@ -17,10 +16,9 @@ public class GameController : MonoBehaviour {
     public int dinoIndex = 0;
     List<TreeObject> trees = new();
     public Chunk[][] chunks = new Chunk[8][];
-    private float updateTimer, updateTime;
+    private float updateTimer, updateTime = 5f;
     // Start is called before the first frame update
     void Start() {
-        updateTime = 5f;
 
         MyJsonUtility.SetJsonText(agentDataJson.text);
         MyJsonUtility.ParseAllJson();
@@ -36,6 +34,7 @@ public class GameController : MonoBehaviour {
         for (int x = 0; x < chunks.Length; x++) {
             for (int z = 0; z < chunks[x].Length; z++) {
                 chunks[x][z] = new Chunk(this, x, z);
+                chunks[x][z].Update();
             }
         }
         foreach (var tree in treeList) {
@@ -45,9 +44,6 @@ public class GameController : MonoBehaviour {
         }
 
         agents = new();
-
-
-
     }
 
 
@@ -55,18 +51,7 @@ public class GameController : MonoBehaviour {
     void Update() {
 
         //causing exception chunks[x][y] is null
-        if (updateTime >= updateTimer) {
-            updateTimer = 0;
-            for (int x = 0; x < chunks.Length; x++) {
-                for (int y = 0; y < chunks[0].Length; y++) {
-                    Debug.Log(chunks[x][y] == null);
-                    chunks[x][y].Update();
-                }
-            }
-        }
-        else {
-            updateTime += Time.deltaTime;
-        }
+        UpdateChunks();
         foreach (Agent agent in agents) {
             if (!agent.alive) {
                 agents.Remove(agent);
@@ -85,6 +70,7 @@ public class GameController : MonoBehaviour {
             GameObject spawnedAgent = Instantiate(agentPrefabs[dinoIndex],
                 Camera.main.transform.position + Camera.main.transform.forward.normalized * 10, Quaternion.identity);
             agents.Add(spawnedAgent.GetComponent<PhysicsObject>());
+            UpdateChunks();
         }
         if (Input.GetKeyDown(KeyCode.F3)) {
             foreach (PhysicsObject agent in agents) {
@@ -106,13 +92,28 @@ public class GameController : MonoBehaviour {
             dinoIndex--;
             if (dinoIndex < 0) { dinoIndex = agentPrefabs.Count - 1; }
         }
-        // Debug.Log(Trex1.state.ToString());  
 
     }
+
+    private void UpdateChunks() {
+        if (updateTime >= updateTimer) {
+            updateTimer = 0;
+            for (int x = 0; x < chunks.Length; x++) {
+                for (int y = 0; y < chunks[0].Length; y++) {
+                    //Debug.Log(chunks[x][y]);
+                    chunks[x][y].Update();
+                }
+            }
+
+        }
+        else {
+            updateTime += Time.deltaTime;
+        }
+    }
+
     public Chunk GetChunk(Vector3 pos) {
         int x = ((int)pos.x - startingPoint) / multi;
         int z = ((int)pos.z - startingPoint) / multi;
-
         return chunks[x][z];
     }
 

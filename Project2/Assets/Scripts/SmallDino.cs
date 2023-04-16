@@ -7,7 +7,7 @@ public class SmallDino : Agent {
     protected override void Awake() {
 
         AssignClassData("sdino");
-        
+        targetTags = new();
         base.Awake();
     }
 

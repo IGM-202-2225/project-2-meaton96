@@ -4,12 +4,12 @@
       "runningSpeedMultiplier": 2,
       "wanderSwitchDirCooldown": 8,
       "turnSpeed": 1,
-      "maxSpeed": 5,
-      "maxRunAwayDistance": 200,
+      "maxSpeed": 7,
+      "maxRunAwayDistance": 150,
       "avoidanceDistance": 100,
       "mass": 1000,
-      "movementPower": 1000,
-      "gravityAmt": 5
+      "movementPower": 5000,
+      "gravityAmt": 10
     },
     "collider1": {
       "x": 0.5,
@@ -182,15 +182,15 @@
   },
   "?sdino": {
     "classdata": {
-      "runningSpeedMultiplier": 4,
-      "wanderSwitchDirCooldown": 7,
+      "runningSpeedMultiplier": 2,
+      "wanderSwitchDirCooldown": 8,
       "turnSpeed": 1,
-      "maxSpeed": 10,
+      "maxSpeed": 5,
       "maxRunAwayDistance": 200,
       "avoidanceDistance": 100,
-      "mass": 100,
-      "movementPower": 600,
-      "gravityAmt": 5
+      "mass": 500,
+      "movementPower": 2500,
+      "gravityAmt": 10
     },
     "collider1": {
       "x": 0.25,
