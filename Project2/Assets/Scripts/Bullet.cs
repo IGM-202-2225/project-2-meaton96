@@ -1,26 +1,25 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Bullet : PhysicsObject {
     public float firePower;
-    public List<PhysicsObject> objects;
+    //public List<PhysicsObject> objects;
     public List<TreeObject> trees;
     private GameController gameController;
     
     protected override void Awake() {
         base.Awake();
-        objects = new();
         firePower = 2500;
-        mass = .5f;
+        mass = 2f;
         radius = .45f;
 
         
     }
-    public void Fire(Vector3 spawnPos, List<PhysicsObject> otherObjects, GameController gameController) {
-        objects = otherObjects;
+    public void Fire(Vector3 spawnPos, GameController gameController) {
         this.gameController = gameController;
-        ApplyForce(spawnPos * firePower);
+        ApplyForce(spawnPos * firePower * mass);
     }
     public override void Update() {
         transform.localRotation = Quaternion.LookRotation(direction);
@@ -29,12 +28,7 @@ public class Bullet : PhysicsObject {
         if (CheckForGround())
             Destroy(gameObject);
 
-        foreach (var obj in objects) {
-            if (obj == null) {
-                objects.Remove(obj);
-                break;
-            }
-        }
+        
         
         ResolveCollision();
 
@@ -52,20 +46,21 @@ public class Bullet : PhysicsObject {
 
 
     public void ResolveCollision() {
-        foreach (Agent obj in objects) {
-            if (obj.CheckCollision(sCollider)) {
-                obj.ApplyForce(firePower / 5f * direction);
-                obj.alive = false;
-                Destroy(gameObject);
+        try {
+            foreach (Agent obj in gameController.GetChunk(transform.position).agents) {
+                if (obj.CheckCollision(sCollider)) {
+                    obj.velocity = Vector3.zero;
+                    obj.ApplyForce(firePower * mass * direction);
+
+                    obj.alive = false;
+                    obj.isActive = false;
+                    Destroy(gameObject);
+                    break;
+                }
             }
+        } catch (ArgumentException) {
+            Destroy(gameObject);
         }
-        //not going to work
-        //foreach (TreeObject tree in gameController.GetChunk(transform.position).trees) {
-        //    if (tree.CheckCollision(sCollider)) {
-        //        tree.ApplyForce(1000 * firePower * direction);
-        //        Destroy(gameObject);
-        //    }
-        //}
     }
 
 

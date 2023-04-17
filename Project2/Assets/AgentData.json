@@ -360,5 +360,42 @@
       "level": 0,
       "vitalLevel": 0
     }
+  },
+  "?flyer": {
+    "classdata": {
+      "runningSpeedMultiplier": 2,
+      "wanderSwitchDirCooldown": 8,
+      "turnSpeed": 1,
+      "maxSpeed": 7,
+      "maxRunAwayDistance": 150,
+      "avoidanceDistance": 100,
+      "mass": 100,
+      "movementPower": 500,
+      "gravityAmt": 10
+    },
+    "collider1": {
+      "x": 0.0,
+      "y": 0.75,
+      "z": -0.6,
+      "radius": 5,
+      "level": 1,
+      "vitalLevel": 0
+    },
+    "collider2": {
+      "x": 0.0,
+      "y": 0.75,
+      "z": -0.6,
+      "radius": 5,
+      "level": 2,
+      "vitalLevel": 3
+    },
+    "collider3": {
+      "x": 0.0,
+      "y": 0.75,
+      "z": -0.6,
+      "radius": 5,
+      "level": 0,
+      "vitalLevel": 0
+    }
   }
 }

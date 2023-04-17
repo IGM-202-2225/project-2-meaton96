@@ -14,13 +14,13 @@ public class Agent : PhysicsObject {
     protected Quaternion previousRotation;                              //tracking for using linear interpolation to turn the agent
     protected Quaternion nextRotation;
     protected Transform target;                                         //current target, agent will run towards this if in chasing state
-   // protected List<Agent> avoidAgents, targetAgents;                    //current world agents to avoid and target depending on tags Carnivore, herbivore ect..
+                                                                        // protected List<Agent> avoidAgents, targetAgents;                    //current world agents to avoid and target depending on tags Carnivore, herbivore ect..
     protected float runningSpeedMultiplier;                             //how much faster to run when chasing or running away then when wandering
     protected State nextState;                                          //holder to move to another state after a turn is completed
     //protected float runningSpeed = 3f;                                  
     protected float maxSpeed;                                           //speed cap, velocity magnitude will not exceed this value
-    //protected Transform runningFrom;                                      //an initial position to run away from, this may be a sound (gunshot or something from player) 
-                                                                          //or a sighting of another actor from the avoidAgents list
+                                                                        //protected Transform runningFrom;                                      //an initial position to run away from, this may be a sound (gunshot or something from player) 
+                                                                        //or a sighting of another actor from the avoidAgents list
     protected float maxRunAwayDistance;                                 //how far away from the initial runningFrom position to get before going back to wandering
     protected float avoidanceDistance;                                  //how close to get to another agent before triggering a seperation 
     protected float stateTimer, stateSwitchTimer;                       //trackers to randomly swap between Idle and Wander states, 50/50 every time at the end of stateSiwtchTimer
@@ -40,6 +40,8 @@ public class Agent : PhysicsObject {
     //protected float seperationDistance = 150f, minSeperationDistance = 100f;
     protected float pursuePredictTime = 2f;
     protected const float SEA_LEVEL = 27f;
+
+    protected const float AVOID_DISTANCE = 25f, OBSTACLE_AVOID_POWER = .6f;
 
     protected Chunk chunk;
 
@@ -71,10 +73,10 @@ public class Agent : PhysicsObject {
         _id = id++;
         //init lists and arrays
         base.Awake();
-       // avoidAgents = new();
+        // avoidAgents = new();
         //targetAgents = new();
         //assign game controller pointer
-        
+
         animator = GetComponent<Animator>();
         //force scan all actors when created to populate avoid and target lists
         //UpdateAgentLists();
@@ -92,7 +94,7 @@ public class Agent : PhysicsObject {
 
     }
     //keeps the agent from going into the water by preventing it from going below sea level
-    protected void StayInBounds() {
+    protected virtual void StayInBounds() {
         if (transform.position.y <= SEA_LEVEL) {
             ApplyForce(stayInBoundsPower * movingPower * GetVectorPerpToShore());
         }
@@ -112,39 +114,65 @@ public class Agent : PhysicsObject {
             }
         }
         return new Vector3(Mathf.Cos(maxAngle), 0f, Mathf.Sin(maxAngle));
-        
+
 
     }
+    //Obstacle Avoidance
+    protected virtual void AvoidTrees() {
+        //testing all trees in the current chunk
+        //this might cause a small issue if a tree is on the edge of a chunk and the agent is moving into that chunk it wont avoid the tree until it has swapped
+        //to the same chunk as the tree
+        foreach (TreeObject tree in chunk.trees) {
+            Vector3 vecToTree = tree.transform.position - transform.position;
+            //ignore if behind
+            if (Vector3.Dot(vecToTree, transform.forward) < 0f) {
+                continue;
+            }
+            //ignore if too far
+            else if (Vector3.Distance(transform.position, tree.transform.position) > AVOID_DISTANCE) {
+                continue;
+            }
+            else {
+                //check for potential collision and steer right or left
+                float radius = colliders[0][0].radius;
+                float dotProd = Vector3.Dot(vecToTree, transform.right);
+                if (Mathf.Abs(dotProd) < radius + tree.radius) {
+                    ApplyForce(movingPower * OBSTACLE_AVOID_POWER * ((dotProd < 0 ? 1 : -1) * transform.right));
+                }
+            }
+        }
+    }
+
     //seperates from all nearby (seperationDistance) agents by apply a force to eachother
     //force is proportional to the distance with maximum force applied nearest to the agent
     void Seperate() {
         List<PhysicsObject> agentsInRange = chunk.GetAgentsOfType(
-            new []{ tag }).
+            new[] { tag }).
             FindAll(
             agent => Vector3.Distance(agent.transform.position, transform.position) < maxRunAwayDistance);
-        
-        foreach(Agent agent in agentsInRange) {
+
+        foreach (Agent agent in agentsInRange) {
             Vector3 dir = agent.transform.position - transform.position;
             dir = dir.normalized * -1;
             float distance = Vector3.Distance(agent.transform.position, transform.position);
             float percentForce = distance / (maxRunAwayDistance - avoidanceDistance);
             ApplyForce(percentForce * movingPower * 2 * dir);
-        }   
+        }
     }
     public override void Update() {
         //call physics object update
         base.Update();
         if (alive) {
-
+            
 
             UpdateSphereCollider();
             CheckCollisionWithOtherAgents();
             if (isActive) {
-                
+
                 if (velocity.magnitude > 0) {
                     transform.rotation = Quaternion.LookRotation(direction);
                 }
-                
+
 
                 //movement behaviour
                 switch (state) {
@@ -176,7 +204,8 @@ public class Agent : PhysicsObject {
 
                 }
                 StayInBounds();
-                
+                AvoidTrees();
+
             }
 
 
@@ -185,9 +214,12 @@ public class Agent : PhysicsObject {
             if (velocity.magnitude > maxSpeed) {
                 velocity = velocity.normalized * maxSpeed;
             }
+            Debug.Log("asdasd");
         }
         else {
+            
             animator.SetTrigger("Die");
+            //frictionAmount *= 2;
         }
 
     }
@@ -201,7 +233,7 @@ public class Agent : PhysicsObject {
             velocity = Vector3.zero;
         }
     }
-    
+
     protected virtual void Flee() {
         if (target == null) {
             state = State.wandering;
@@ -212,11 +244,11 @@ public class Agent : PhysicsObject {
         float xV = transform.position.x - target.position.x;
         float zV = transform.position.z - target.position.z;
         desiredVelocity = new Vector3(xV, velocity.y, zV).normalized * 10;
-        
+
 
 
         ApplyForce((desiredVelocity - velocity) * movingPower);
-        
+
     }
 
     //assign class data fields that determine movement logic based on the passed in class name
@@ -248,7 +280,7 @@ public class Agent : PhysicsObject {
         state = State.wandering;
         stateSwitchTimer = 13f;
         runAwayTime = 7f;
-        
+
     }
     //returns true if the agent has a tag that is in the list of target tags this agent has
     protected bool IsATargetTag(Agent agent) {
@@ -273,7 +305,7 @@ public class Agent : PhysicsObject {
     //}
     //do nothing, 50/50 chance every stateSwitchTimer to swap between idle and wander
     public void Idle() {
-        
+
         velocity = Vector3.zero;
         if (stateTimer > stateSwitchTimer) {
             stateTimer = 0f;
@@ -307,13 +339,13 @@ public class Agent : PhysicsObject {
     //run away from the runAwayFrom position
     //will turn directly away from and set the state to run away
     //public void RunAwayFrom(Transform runAwayFrom) {
-        
+
     //    runningFrom = runAwayFrom;
     //    TurnTo(Quaternion.LookRotation(new Vector3(-runAwayFrom.position.x, 0f, -runAwayFrom.position.z)));
     //    nextState = State.fleeing;
     //}
     //move forawrd by the specified multiplier
-    
+
     //wanders around
     //changes direction randomly every so often
     //protected virtual void Wander() {
@@ -350,7 +382,7 @@ public class Agent : PhysicsObject {
 
     //}
     protected virtual void Wander() {
-        
+
         Vector3 circleCenter;
         circleCenter = new Vector3(velocity.x, velocity.y, velocity.z).normalized * CIRCLE_DISTANCE;
 
@@ -398,7 +430,8 @@ public class Agent : PhysicsObject {
                                 nextState = State.idle;
                                 animator.SetTrigger("Eat");
                                 return;
-                            }else {
+                            }
+                            else {
                                 //??
                             }
                         }
@@ -415,9 +448,9 @@ public class Agent : PhysicsObject {
         agent.isActive = false;
         chunk.RemoveAgentFromChunk(agent);
         target = null;
-        
+
         state = State.idle;
-    } 
+    }
     //check each level of collision against other SphereCollider
     public override bool CheckCollision(SimpleSphereCollider other) {
         if (colliders[0] == null)
@@ -445,6 +478,6 @@ public class Agent : PhysicsObject {
         }
         return false;
     }
-    
+
 
 }

@@ -17,11 +17,14 @@ public class GameController : MonoBehaviour {
     List<TreeObject> trees = new();
     public Chunk[][] chunks = new Chunk[8][];
     private float updateTimer, updateTime = 5f;
+    private Terrain terrain;
     // Start is called before the first frame update
     void Start() {
 
         MyJsonUtility.SetJsonText(agentDataJson.text);
         MyJsonUtility.ParseAllJson();
+        terrain = GameObject.FindWithTag("Ground").GetComponent<Terrain>();
+
 
         for (int x = 0; x < chunks.Length; x++) {
             chunks[x] = new Chunk[chunks.Length];
@@ -61,11 +64,7 @@ public class GameController : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.F1)) {
             agents.ForEach(agent => ((Agent)agent).ToggleAI());
         }
-        if (Input.GetKeyDown(KeyCode.Space)) {
-            Bullet bullet = Instantiate(bulletPrefab, Camera.main.transform.position, Quaternion.identity).GetComponent<Bullet>();
-            bullet.transform.localScale = new Vector3(2, 2, 2);
-            bullet.Fire(Camera.main.transform.forward, agents, this);
-        }
+        
         if (Input.GetKeyDown(KeyCode.F2)) {
             GameObject spawnedAgent = Instantiate(agentPrefabs[dinoIndex],
                 Camera.main.transform.position + Camera.main.transform.forward.normalized * 10, Quaternion.identity);
@@ -81,8 +80,13 @@ public class GameController : MonoBehaviour {
             }
         }
         if (Input.GetKeyDown(KeyCode.F4)) {
-            if (agents.Count >= 2 && agents[0] != null && agents[1] != null)
-                agents[0].GetComponent<Agent>().FleeTarget(agents[1].transform);
+            int numToSpawn = 200;
+            for (int x = 0; x < numToSpawn; x++) {
+                float xLoc = UnityEngine.Random.Range(-1000, 1000);
+                float zLoc = UnityEngine.Random.Range(-1000, 1000);
+                float yLoc = terrain.SampleHeight(new Vector3(xLoc, 0f, zLoc)) + UnityEngine.Random.Range(50, 150);
+                Instantiate(agentPrefabs[2], new Vector3(xLoc, yLoc, zLoc), Quaternion.identity);
+            }
         }
         if (Input.GetKeyDown(KeyCode.UpArrow)) {
             dinoIndex++;
@@ -114,6 +118,10 @@ public class GameController : MonoBehaviour {
     public Chunk GetChunk(Vector3 pos) {
         int x = ((int)pos.x - startingPoint) / multi;
         int z = ((int)pos.z - startingPoint) / multi;
+        if (x < 0 || z < 0 || x > chunks.Length || z > chunks[0].Length) {
+            throw new ArgumentException();
+            
+        }
         return chunks[x][z];
     }
 

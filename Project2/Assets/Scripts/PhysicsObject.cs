@@ -108,6 +108,11 @@ public class PhysicsObject : MonoBehaviour {
         friction = frictionAmount * friction.normalized;
         ApplyForce(friction);
     }
+    public void ApplyFriction(float multiplier) {
+        Vector3 friction = -velocity;
+        friction = frictionAmount * multiplier * friction.normalized;
+        ApplyForce(friction);
+    }
     public void ApplyGravity() {
         
         acceleration += new Vector3(0f, -gravityAmount, 0f);
