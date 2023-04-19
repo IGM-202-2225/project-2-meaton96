@@ -1,70 +1,107 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 public class Player : PhysicsObject {
 
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private GameController gameController;
-    protected float movingPower = 500;
+    protected float movingPower = 1000;
     protected float turningSpeed = .1f;
     [SerializeField] private float speed;
     public Transform targetObject;
 
-    
+    private bool freeCam;
+    private Vector3 playerLocation;
+    private Quaternion playerRotation;
+
+    [SerializeField] private GameObject hudImage, crossHair;
 
     [SerializeField] protected float jumpingPower;
-
+    [SerializeField] protected float frictionPercent;
     bool headBob = true;
     protected float maxSpeed = 10f;
     protected float maxSpeedSprint = 20f;
     bool isSprinting;
     [SerializeField] protected GameObject playerCharacter;
 
+
+
     Vector2 mousePos;
     public float sensitivity = 1.5f;
     // Start is called before the first frame update
     void Start() {
         frictionEnabled = true;
-        frictionAmount = movingPower / 2f;
+        frictionAmount = movingPower * frictionPercent;
         gravityEnabled = true;
         mass = 50;
-        jumpingPower = 500f;
+        speed = 10;
+        jumpingPower = 50000f;
         Cursor.lockState = CursorLockMode.Locked;
+        freeCam = false;
+        
+        //gravityAmount = 30f;
     }
     public override void Update() {
-        HandleInput();
+
+        if (!freeCam) {
+            HandleInput();
+            
+            isSprinting = !Input.GetKey(KeyCode.LeftShift);
+
+            if (isSprinting) {
+                if (velocity.magnitude > maxSpeedSprint) {
+                    velocity = velocity.normalized * maxSpeedSprint;
+                }
+            }
+            else {
+                if (velocity.magnitude > maxSpeed) {
+                    velocity = velocity.normalized * maxSpeed;
+                }
+            }
+
+            if (headBob) {
+                if (velocity.magnitude > 0f) {
+                    //headbob
+                }
+            }
+            base.Update();
+            
+           
+
+        } else {
+            CameraKeyboardMovement();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Tab)) {
+            velocity = Vector3.zero;    
+            hudImage.SetActive(freeCam);
+            crossHair.SetActive(freeCam);
+            freeCam = !freeCam;
+            
+            if (freeCam) {
+                playerLocation = transform.position;
+                playerRotation = transform.rotation;
+            }
+            else {
+                transform.position = playerLocation;
+                transform.rotation = playerRotation;
+            }
+        }
+
         mousePos.x += Input.GetAxis("Mouse X") * sensitivity;
         mousePos.y += Input.GetAxis("Mouse Y") * sensitivity;
 
         transform.localRotation = Quaternion.Euler(-mousePos.y, mousePos.x, 0f);
 
-        isSprinting = !Input.GetKey(KeyCode.LeftShift);
-
-        if (isSprinting) {
-            if (velocity.magnitude > maxSpeedSprint) {
-                velocity = velocity.normalized * maxSpeedSprint;
-            }
-        }
-        else {
-            if (velocity.magnitude > maxSpeed) {
-                velocity = velocity.normalized * maxSpeed;
-            }
-        }
-
-        if (headBob ) {
-            if (velocity.magnitude > 0f) {
-
-            }
-        }
-
         //CameraKeyboardMovement();
 
         //ZoomAmount += Input.GetAxis("Mouse ScrollWheel");
-      //  ZoomAmount = Mathf.Clamp(ZoomAmount, -MaxToClamp, MaxToClamp);
+        //  ZoomAmount = Mathf.Clamp(ZoomAmount, -MaxToClamp, MaxToClamp);
         //var translate = Mathf.Min(Mathf.Abs(Input.GetAxis("Mouse ScrollWheel")), MaxToClamp - Mathf.Abs(ZoomAmount));
-      //  gameObject.transform.Translate(0, 0, translate * ROTSpeed * Mathf.Sign(Input.GetAxis("Mouse ScrollWheel")));
-        base.Update();
+        //  gameObject.transform.Translate(0, 0, translate * ROTSpeed * Mathf.Sign(Input.GetAxis("Mouse ScrollWheel")));
+        
     }
     protected void HandleInput() {
         if (Input.GetKey(KeyCode.W)) {
@@ -82,15 +119,15 @@ public class Player : PhysicsObject {
         }
         else {
             //velocity = new Vector3(0f, velocity.y, 0f);
-            ApplyFriction(2);
+          //  ApplyFriction(2);
         }
-
-        if (Input.GetKeyDown(KeyCode.Space)) {
-            ApplyForce(jumpingPower * transform.up);
+        if (CheckForGround()) {
+            if (Input.GetKeyDown(KeyCode.Space)) {
+                ApplyForce(jumpingPower * transform.up);
+            }
         }
         if (Input.GetMouseButtonDown(0)) {
             Bullet bullet = Instantiate(bulletPrefab, Camera.main.transform.position, Quaternion.identity).GetComponent<Bullet>();
-            bullet.transform.localScale = new Vector3(2, 2, 2);
             bullet.Fire(Camera.main.transform.forward, gameController);
         }
 
@@ -98,18 +135,24 @@ public class Player : PhysicsObject {
     }
 
     void CameraKeyboardMovement() {
-        if (Input.GetKey(KeyCode.RightArrow)) {
-            transform.Translate(new Vector3(speed * Time.deltaTime, 0, 0));
+        if (Input.GetKey(KeyCode.W)) {
+            transform.Translate(speed * Time.deltaTime * Vector3.up);
         }
-        if (Input.GetKey(KeyCode.LeftArrow)) {
-            transform.Translate(new Vector3(-speed * Time.deltaTime, 0, 0));
+        if (Input.GetKey(KeyCode.A)) {
+            transform.Translate(speed * Time.deltaTime * Vector3.left);
         }
-        if (Input.GetKey(KeyCode.DownArrow)) {
-            transform.Translate(new Vector3(0, -speed * Time.deltaTime, 0));
+        if (Input.GetKey(KeyCode.S)) {
+            transform.Translate(speed * Time.deltaTime * Vector3.down);
         }
-        if (Input.GetKey(KeyCode.UpArrow)) {
-            transform.Translate(new Vector3(0, speed * Time.deltaTime, 0));
+        if (Input.GetKey(KeyCode.D)) {
+            transform.Translate(speed * Time.deltaTime * Vector3.right);
         }
+        if (Input.GetKey(KeyCode.LeftShift)) {
+            transform.Translate(0, 0, speed * 2 * Time.deltaTime);
+        }
+    }
+    private void OnDrawGizmos() {
+        Gizmos.DrawLine(transform.position, transform.forward);
     }
 
 }

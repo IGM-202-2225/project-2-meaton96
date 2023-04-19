@@ -8,18 +8,18 @@ public class Bullet : PhysicsObject {
     //public List<PhysicsObject> objects;
     public List<TreeObject> trees;
     private GameController gameController;
-    
+
     protected override void Awake() {
         base.Awake();
         firePower = 2500;
         mass = 2f;
         radius = .45f;
 
-        
+
     }
     public void Fire(Vector3 spawnPos, GameController gameController) {
         this.gameController = gameController;
-        ApplyForce(spawnPos * firePower * mass);
+        ApplyForce(firePower * mass * spawnPos);
     }
     public override void Update() {
         transform.localRotation = Quaternion.LookRotation(direction);
@@ -28,8 +28,8 @@ public class Bullet : PhysicsObject {
         if (CheckForGround())
             Destroy(gameObject);
 
-        
-        
+
+
         ResolveCollision();
 
         base.Update();
@@ -51,14 +51,17 @@ public class Bullet : PhysicsObject {
                 if (obj.CheckCollision(sCollider)) {
                     obj.velocity = Vector3.zero;
                     obj.ApplyForce(firePower * mass * direction);
-
+                    
                     obj.alive = false;
                     obj.isActive = false;
+
+                    gameController.GetChunk(transform.position).Update();
                     Destroy(gameObject);
                     break;
                 }
             }
-        } catch (ArgumentException) {
+        }
+        catch (Exception) {
             Destroy(gameObject);
         }
     }

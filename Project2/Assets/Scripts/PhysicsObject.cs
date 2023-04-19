@@ -10,7 +10,7 @@ public class PhysicsObject : MonoBehaviour {
     public bool frictionEnabled;
     public float frictionAmount;
     public bool gravityEnabled;
-    public float gravityAmount = 10;
+    protected readonly float gravityAmount = 15;
     public float bounceAmount;
     public bool collisionEnabled = true;
     public float radius;
@@ -30,15 +30,17 @@ public class PhysicsObject : MonoBehaviour {
     // Update is called once per frame
     public virtual void Update() {
 
+        if (frictionEnabled)
+            ApplyFriction();
+
         if (CheckForGround()) {
-            if (frictionEnabled)
-                ApplyFriction();
+
             velocity.y = 0;
             Vector3 pos = transform.position;
             pos.y = terrain.SampleHeight(new Vector3(transform.position.x, 0f, transform.position.z));
             transform.position = pos;
         }
-        else if (gravityEnabled) {
+        if (gravityEnabled) {
             ApplyGravity();
         }
         UpdateSphereCollider();
@@ -85,36 +87,26 @@ public class PhysicsObject : MonoBehaviour {
     public void DisableGravity() {
         gravityEnabled = false;
     }
-    public void SetGravityAmount(float amount) {
-        gravityAmount = amount;
-    }
+
     public void SetBounceAmount(float amount) {
         bounceAmount = amount;
-    }
-    public void Init(bool fric, float fricAmt, bool gravity, float gravityAmt, float bounceAmt, float mass) {
-        frictionEnabled = fric;
-        frictionAmount = fricAmt;
-        gravityEnabled = gravity;
-        gravityAmount = gravityAmt;
-        bounceAmount = bounceAmt;
-        this.mass = mass;
     }
     public void SetMass(float mass) {
         this.mass = mass;
     }
 
     public void ApplyFriction() {
-        Vector3 friction = -velocity;
+        Vector3 friction = new Vector3(-velocity.x, 0f, -velocity.z);
         friction = frictionAmount * friction.normalized;
         ApplyForce(friction);
     }
     public void ApplyFriction(float multiplier) {
-        Vector3 friction = -velocity;
+        Vector3 friction = new Vector3(-velocity.x, 0f, -velocity.z);
         friction = frictionAmount * multiplier * friction.normalized;
         ApplyForce(friction);
     }
     public void ApplyGravity() {
-        
+
         acceleration += new Vector3(0f, -gravityAmount, 0f);
     }
 }

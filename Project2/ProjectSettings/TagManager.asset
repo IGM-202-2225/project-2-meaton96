@@ -16,6 +16,7 @@ TagManager:
   - SmallHerbivore
   - LargeHerbivore
   - SmallCarnivore
+  - Flyer
   layers:
   - Default
   - TransparentFX

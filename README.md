@@ -18,8 +18,8 @@ Player can explode trees to adjust dinosaur pathing behaviors
 
 -   Fly-cam current controls
     -   WASD to move camera, right click and drag to rotate camera
-    -   F1 to toggle dinosaur AI, F2 to spawn dinosaur, F3 to print all current dinosaur infos to debug console
-    -   Up/Down arrow to chose a dinosaur to spawn (currently 2)
+    -   F1 to toggle dinosaur AI, F2 to spawn dinosaurs, F3 to toggle obstacle avoidance
+    -   Up/Down arrow to chose a dinosaur to spawn
     -   Space bar to fire a bullet
     -   Bullets can interact with dinosaurs and trees, bullets kills dinosaurs and also will knock trees over
 
@@ -35,7 +35,7 @@ A carniverous agent that will wander around and hunt smaller creatures
 
 *  Wander movement using the circle method with small wander angle changes
    *  tracks nearby agents to start pursuing
-*  Obstacles - NYI
+*  Obstacles - Avoids all tree obstacles
 *  Seperation - Will seperate from any agent with the same tag
    
 #### State Transistions
@@ -50,7 +50,7 @@ A carniverous agent that will wander around and hunt smaller creatures
 #### Steering Behaviors
 
 -  Steers towards a target agent by predicting its movement by up to 2 seconds. The time is reduced as it gets closer.
--  Obstacles - NYI
+-  Obstacles - avoids all tree obstacles
 -  Seperation - Not implemented in this state. Agent will ignore everything except pursuing its target.
    
 #### State Transistions
@@ -68,7 +68,7 @@ A small herbivore dino, faster and more nimble than the TRex
 #### Steering Behaviors
 
 - Wander movement using the circle method with small wander angle changes
-- Obstacles - NYI
+- Obstacles - Avoids all tree obstacles
 - Seperation - Any agent of the same type
    
 #### State Transistions
@@ -82,12 +82,27 @@ A small herbivore dino, faster and more nimble than the TRex
 #### Steering Behaviors
 
 - uses fleeing logic to move away from a target transform
-- Obstacles - NYI
+- Obstacles - Avoids all tree obstacles
 - Seperation - Any agent of the same type
    
 #### State Transistions
 
 - NYI
+
+## Flyer
+A large slow flying dinosaur
+
+### Wander
+Default and only current state (v0.0.3). The agent wanders around the sky randomly
+
+#### Steering Behaviours
+
+- Wander movement using the circle method with small wander angle changes
+- Obstacles - None
+- Seperation - Any agent of the same type
+
+#### State Transitions
+- None
 
 ## Sources
 
@@ -107,8 +122,21 @@ A small herbivore dino, faster and more nimble than the TRex
 
 ## Known Issues
 
--  Tree hitbox is bugged and is disabled (v0.0.2)
--  T-rex successfully completing a hunt does not correctly play the death animation of the small dino agent (v0.0.2)
+-  Tree Hitboxes are bugged and have been disabled
+
+## Documentation
+
+*For Grading:* Most movement behaviours can be found in the Agent class which derives from PhysicsObject and is the base class for all agent types [View Agent.cs on Github](Project2/Assets/Scripts/Agent.cs)
+
+Pursuit can be viewed in the Trex class [View TRex.cs on Github](Project2/Assets/Scripts/TRex.cs)
+
+-  v0.0.3
+	-  Fixed bug with friction preventing flying dinosaurs from actually moving
+	-  Removed some old variables and updated the JSON to read in new movement variables
+	-  Added obstacle avoidance for the two ground dinosaurs
+		-  This can be enabled or disabled by pressing F3, default=enabled
+	-  Added free camera mode so you can move around more freely and view agents' movement behaviour more easily
+		-  Toggle free camera by pressing Tab
 
 ### Requirements not completed
 

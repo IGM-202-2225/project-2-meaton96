@@ -9,18 +9,18 @@ public class Flyer : Agent {
     private float maxBoundsDistance = 1700f;
     private float minBoundsDistance = 1600f;
     protected override void Awake() {
-
-        liftAmount = gravityAmount;
         AssignClassData("flyer");
+        liftAmount = gravityAmount;
+        
         targetTags = new();
         base.Awake();
         animator.SetBool("isFlapping", true);
+        frictionEnabled = false;
+        gravityEnabled = false;
     }
 
     public override void Update() {
         Lift();
-
-
         base.Update();
     }
     private void Lift() {
@@ -48,6 +48,7 @@ public class Flyer : Agent {
 
         
     }
+    protected override void AvoidTrees() {}
 
 
 }

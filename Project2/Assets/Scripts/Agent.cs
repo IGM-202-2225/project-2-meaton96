@@ -8,19 +8,19 @@ using UnityEngine;
 public class Agent : PhysicsObject {
     //public GameObject ground;                                           //temporary reference to ground object, will change to terrain later
     protected Animator animator;                                        //pointer to animator to change animations
-    protected float wanderTimer, wanderSwitchDirCooldown;               //timers for tracking wandering around
+    //protected float wanderTimer, wanderSwitchDirCooldown;               //timers for tracking wandering around
     [SerializeField] protected float movingPower;                       //how strong in Newtons? to call ApplyForce
-    protected float turnSpeed, turnTimer;                               //timers to track turning, turning takes place over timeSpeed time in seconds
-    protected Quaternion previousRotation;                              //tracking for using linear interpolation to turn the agent
-    protected Quaternion nextRotation;
+    //protected float turnSpeed, turnTimer;                               //timers to track turning, turning takes place over timeSpeed time in seconds
+   // protected Quaternion previousRotation;                              //tracking for using linear interpolation to turn the agent
+  //  protected Quaternion nextRotation;
     protected Transform target;                                         //current target, agent will run towards this if in chasing state
                                                                         // protected List<Agent> avoidAgents, targetAgents;                    //current world agents to avoid and target depending on tags Carnivore, herbivore ect..
-    protected float runningSpeedMultiplier;                             //how much faster to run when chasing or running away then when wandering
-    protected State nextState;                                          //holder to move to another state after a turn is completed
+                                                                        // protected float runningSpeedMultiplier;                             //how much faster to run when chasing or running away then when wandering
+   // protected State nextState;                                          //holder to move to another state after a turn is completed
     //protected float runningSpeed = 3f;                                  
     protected float maxSpeed;                                           //speed cap, velocity magnitude will not exceed this value
-                                                                        //protected Transform runningFrom;                                      //an initial position to run away from, this may be a sound (gunshot or something from player) 
-                                                                        //or a sighting of another actor from the avoidAgents list
+    protected float maxSpeedWander;                                                                                               //an initial position to run away from, this may be a sound (gunshot or something from player) 
+                                                                                                                                  //or a sighting of another actor from the avoidAgents list
     protected float maxRunAwayDistance;                                 //how far away from the initial runningFrom position to get before going back to wandering
     protected float avoidanceDistance;                                  //how close to get to another agent before triggering a seperation 
     protected float stateTimer, stateSwitchTimer;                       //trackers to randomly swap between Idle and Wander states, 50/50 every time at the end of stateSiwtchTimer
@@ -32,9 +32,15 @@ public class Agent : PhysicsObject {
 
     public List<SimpleSphereCollider>[] colliders = new List<SimpleSphereCollider>[3];   //contains lists of all colliders for the agent, up to 3 layers of collider logic
 
-    public float runAwayTimer, runAwayTime;
+    //public float runAwayTimer, runAwayTime;
 
-    protected const float CIRCLE_DISTANCE = 1f, CIRCLE_RADIUS = 2f, ANGLE_CHANGE = 0.275f, SHORE_CHECK_RADIUS = 10f, SHORE_CHECK_ANGLE = .1f;
+    //protected const float CIRCLE_DISTANCE = 1f;                 
+    //protected const float CIRCLE_RADIUS = 2f;
+    // protected const float ANGLE_CHANGE = 0.175f;
+    protected const float SHORE_CHECK_RADIUS = 10f;
+    protected const float SHORE_CHECK_ANGLE = .1f;
+
+    protected float wanderCircleDistance, wanderCircleRadius, wanderAnglechange;
     protected float wanderAngle = 0f;
     protected float stayInBoundsPower = 10f;
     //protected float seperationDistance = 150f, minSeperationDistance = 100f;
@@ -42,6 +48,8 @@ public class Agent : PhysicsObject {
     protected const float SEA_LEVEL = 27f;
 
     protected const float AVOID_DISTANCE = 25f, OBSTACLE_AVOID_POWER = .6f;
+
+    public bool avoidingObstacles = true;
 
     protected Chunk chunk;
 
@@ -53,9 +61,7 @@ public class Agent : PhysicsObject {
         idle,
         wandering,
         fleeing,
-        chasing,
         hurt,
-        turning,
         pursuing
     }
 
@@ -115,7 +121,6 @@ public class Agent : PhysicsObject {
         }
         return new Vector3(Mathf.Cos(maxAngle), 0f, Mathf.Sin(maxAngle));
 
-
     }
     //Obstacle Avoidance
     protected virtual void AvoidTrees() {
@@ -163,7 +168,7 @@ public class Agent : PhysicsObject {
         //call physics object update
         base.Update();
         if (alive) {
-            
+
 
             UpdateSphereCollider();
             CheckCollisionWithOtherAgents();
@@ -189,22 +194,10 @@ public class Agent : PhysicsObject {
                     case State.pursuing:
                         Pursue();
                         break;
-                    case State.turning:
-                        //turns the agent
-                        if (turnTimer > turnSpeed) {
-                            turnTimer = 0f;
-                            state = nextState;
-                        }
-                        else {
-                            transform.rotation = Quaternion.Slerp(previousRotation, nextRotation, turnTimer * turnSpeed);
-                            turnTimer += Time.deltaTime;
-                        }
-
-                        break;
-
                 }
                 StayInBounds();
-                AvoidTrees();
+                if (avoidingObstacles)
+                    AvoidTrees();
 
             }
 
@@ -214,12 +207,10 @@ public class Agent : PhysicsObject {
             if (velocity.magnitude > maxSpeed) {
                 velocity = velocity.normalized * maxSpeed;
             }
-            Debug.Log("asdasd");
         }
         else {
-            
+
             animator.SetTrigger("Die");
-            //frictionAmount *= 2;
         }
 
     }
@@ -259,18 +250,16 @@ public class Agent : PhysicsObject {
 
         AgentData ad = MyJsonUtility.classData[className];
 
-        runningSpeedMultiplier = ad.runningSpeedMultiplier;
-        wanderSwitchDirCooldown = ad.wanderSwitchDirCooldown;
-        turnSpeed = ad.turnSpeed;
         maxSpeed = ad.maxSpeed;
+        maxSpeedWander = maxSpeed * ad.runningSpeedMultiplier;
         maxRunAwayDistance = ad.maxRunAwayDistance;
         avoidanceDistance = ad.avoidanceDistance;
         mass = ad.mass;
         movingPower = ad.movementPower;
-        gravityAmount = ad.gravityAmt;
+        //gravityAmount = ad.gravityAmt;
 
-        frictionEnabled = false;
-        frictionAmount = 2000f;
+        //frictionEnabled = false;
+        frictionAmount = movingPower * .6f;
         //assign each of the colliders in the collider list for this class 
         //by copying them from the JsonUtilty list
         MyJsonUtility.colliderList[className].ForEach(collider => {
@@ -278,8 +267,10 @@ public class Agent : PhysicsObject {
         });
         agentPollRate = 5f;
         state = State.wandering;
-        stateSwitchTimer = 13f;
-        runAwayTime = 7f;
+        //stateSwitchTimer = 13f;
+        wanderCircleDistance = ad.circleDistance;
+        wanderCircleRadius = ad.circleRadius;
+        wanderAnglechange = ad.angleChange;
 
     }
     //returns true if the agent has a tag that is in the list of target tags this agent has
@@ -317,81 +308,18 @@ public class Agent : PhysicsObject {
     public void UpdateChunk(Chunk chunk) {
         this.chunk = chunk;
     }
-    //increments the state
-    //only for testing
-    public void NextState() {
-        state++;
-        if (state == State.turning) {
-            state = 0;
-        }
-    }
-    public void StartChase(Transform target) {
-        this.target = target;
-        nextState = State.chasing;
-        TurnTo(Quaternion.LookRotation(target.position));
-
-    }
-    //will move forward and continually rotate to look at the taret transform
-    //private void ChaseTarget() {
-    //    transform.LookAt(target, Vector3.up);
-    //    MoveForward(movingPower * 2);
-    //}
-    //run away from the runAwayFrom position
-    //will turn directly away from and set the state to run away
-    //public void RunAwayFrom(Transform runAwayFrom) {
-
-    //    runningFrom = runAwayFrom;
-    //    TurnTo(Quaternion.LookRotation(new Vector3(-runAwayFrom.position.x, 0f, -runAwayFrom.position.z)));
-    //    nextState = State.fleeing;
-    //}
-    //move forawrd by the specified multiplier
-
-    //wanders around
-    //changes direction randomly every so often
-    //protected virtual void Wander() {
 
 
-    //    //50/50 to start idling or continue wandering
-    //    if (stateTimer > stateSwitchTimer) {
-    //        stateTimer = 0f;
-    //        if (UnityEngine.Random.Range(0, 2) == 0) {
-    //            state = State.idle;
-    //        }
-    //    }
-    //    else
-    //        stateTimer += Time.deltaTime;
-
-    //    //randomly change direction
-    //    if (wanderTimer >= wanderSwitchDirCooldown) {
-    //        Vector3 currentRotation = transform.rotation.eulerAngles;
-    //        wanderTimer = 0;
-    //        nextState = State.wandering;
-    //        TurnTo(
-    //            Quaternion.Euler(
-    //                new Vector3(
-    //                    currentRotation.x,
-    //                    UnityEngine.Random.Range(0f, 360f),
-    //                    currentRotation.z)));
-    //    }
-    //    wanderTimer += Time.deltaTime;
-
-    //    MoveForward(movingPower);
-
-
-
-
-    //}
     protected virtual void Wander() {
-
         Vector3 circleCenter;
-        circleCenter = new Vector3(velocity.x, velocity.y, velocity.z).normalized * CIRCLE_DISTANCE;
+        circleCenter = new Vector3(velocity.x, velocity.y, velocity.z).normalized * wanderCircleDistance;
 
-        Vector3 displacement = Vector3.down * CIRCLE_RADIUS;
+        Vector3 displacement = Vector3.down * wanderCircleRadius;
 
         displacement.x = Mathf.Cos(wanderAngle) * displacement.magnitude;
         displacement.z = Mathf.Sin(wanderAngle) * displacement.magnitude;
 
-        wanderAngle += UnityEngine.Random.Range(-ANGLE_CHANGE, ANGLE_CHANGE);
+        wanderAngle += UnityEngine.Random.Range(-wanderAnglechange, wanderAnglechange);
 
         Vector3 wanderForce = displacement + circleCenter;
 
@@ -405,13 +333,7 @@ public class Agent : PhysicsObject {
     }
 
     //sets up agent turning to direction rotation
-    protected virtual void TurnTo(Quaternion direction) {
 
-        previousRotation = transform.rotation;
-        nextRotation = direction;
-        velocity = Vector3.zero;
-        state = State.turning;
-    }
     protected void CheckCollisionWithOtherAgents() {
         foreach (Agent agent in chunk.agents) {
             if (agent == this) continue;
@@ -426,8 +348,6 @@ public class Agent : PhysicsObject {
                                 velocity = Vector3.zero;
                                 agent.velocity = Vector3.zero;
                                 target = agent.transform;
-                                TurnTo(Quaternion.LookRotation(target.position));
-                                nextState = State.idle;
                                 animator.SetTrigger("Eat");
                                 return;
                             }
