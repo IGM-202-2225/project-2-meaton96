@@ -6,21 +6,14 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 public class Agent : PhysicsObject {
-    //public GameObject ground;                                           //temporary reference to ground object, will change to terrain later
     protected Animator animator;                                        //pointer to animator to change animations
-    //protected float wanderTimer, wanderSwitchDirCooldown;               //timers for tracking wandering around
     [SerializeField] protected float movingPower;                       //how strong in Newtons? to call ApplyForce
-    //protected float turnSpeed, turnTimer;                               //timers to track turning, turning takes place over timeSpeed time in seconds
-   // protected Quaternion previousRotation;                              //tracking for using linear interpolation to turn the agent
-  //  protected Quaternion nextRotation;
-    protected Transform target;                                         //current target, agent will run towards this if in chasing state
-                                                                        // protected List<Agent> avoidAgents, targetAgents;                    //current world agents to avoid and target depending on tags Carnivore, herbivore ect..
-                                                                        // protected float runningSpeedMultiplier;                             //how much faster to run when chasing or running away then when wandering
-   // protected State nextState;                                          //holder to move to another state after a turn is completed
-    //protected float runningSpeed = 3f;                                  
+     protected Transform target;                                         //current target, agent will run towards this if in chasing state
+                                                                        // protected List<Agent> avoidAgents, targetAgents;                    
+                                                                        // protected float runningSpeedMultiplier;                             
     protected float maxSpeed;                                           //speed cap, velocity magnitude will not exceed this value
-    protected float maxSpeedWander;                                                                                               //an initial position to run away from, this may be a sound (gunshot or something from player) 
-                                                                                                                                  //or a sighting of another actor from the avoidAgents list
+    protected float maxSpeedWander;                                     //an initial position to run away from, this may be a sound (gunshot or something from player) 
+                                                                         //or a sighting of another actor from the avoidAgents list
     protected float maxRunAwayDistance;                                 //how far away from the initial runningFrom position to get before going back to wandering
     protected float avoidanceDistance;                                  //how close to get to another agent before triggering a seperation 
     protected float stateTimer, stateSwitchTimer;                       //trackers to randomly swap between Idle and Wander states, 50/50 every time at the end of stateSiwtchTimer
@@ -32,18 +25,15 @@ public class Agent : PhysicsObject {
 
     public List<SimpleSphereCollider>[] colliders = new List<SimpleSphereCollider>[3];   //contains lists of all colliders for the agent, up to 3 layers of collider logic
 
-    //public float runAwayTimer, runAwayTime;
+    protected Vector3 totalForces;
 
-    //protected const float CIRCLE_DISTANCE = 1f;                 
-    //protected const float CIRCLE_RADIUS = 2f;
-    // protected const float ANGLE_CHANGE = 0.175f;
     protected const float SHORE_CHECK_RADIUS = 10f;
     protected const float SHORE_CHECK_ANGLE = .1f;
 
     protected float wanderCircleDistance, wanderCircleRadius, wanderAnglechange;
     protected float wanderAngle = 0f;
     protected float stayInBoundsPower = 10f;
-    //protected float seperationDistance = 150f, minSeperationDistance = 100f;
+
     protected float pursuePredictTime = 2f;
     protected const float SEA_LEVEL = 27f;
 
@@ -77,22 +67,17 @@ public class Agent : PhysicsObject {
         gameController = GameObject.FindWithTag("GameController").GetComponent<GameController>();
         chunk = gameController.GetChunk(transform.position);
         _id = id++;
-        //init lists and arrays
         base.Awake();
-        // avoidAgents = new();
-        //targetAgents = new();
-        //assign game controller pointer
 
         animator = GetComponent<Animator>();
-        //force scan all actors when created to populate avoid and target lists
-        //UpdateAgentLists();
+
         //activate movement logic
         isActive = true;
         alive = true;
         frictionEnabled = true;
 
     }
-    protected virtual void Pursue() { }
+    protected virtual Vector3 Pursue() { return Vector3.zero; }
     protected override void UpdateSphereCollider() {
         foreach (List<SimpleSphereCollider> colliderLists in colliders) {
             colliderLists.ForEach(collider => collider.Update(transform.position));
@@ -100,10 +85,11 @@ public class Agent : PhysicsObject {
 
     }
     //keeps the agent from going into the water by preventing it from going below sea level
-    protected virtual void StayInBounds() {
+    protected virtual Vector3 StayInBounds() {
         if (transform.position.y <= SEA_LEVEL) {
-            ApplyForce(stayInBoundsPower * movingPower * GetVectorPerpToShore());
+            return stayInBoundsPower * GetVectorPerpToShore();
         }
+        return Vector3.zero;
     }
     //checks all around the agent in a radius of SHORE_CHECK_RADIUS
     //gets every point on the circle seperated by angle SHORE_CHECK_ANGLE
@@ -123,10 +109,11 @@ public class Agent : PhysicsObject {
 
     }
     //Obstacle Avoidance
-    protected virtual void AvoidTrees() {
+    protected virtual Vector3 AvoidTrees() {
         //testing all trees in the current chunk
         //this might cause a small issue if a tree is on the edge of a chunk and the agent is moving into that chunk it wont avoid the tree until it has swapped
         //to the same chunk as the tree
+        Vector3 forces = Vector3.zero;
         foreach (TreeObject tree in chunk.trees) {
             Vector3 vecToTree = tree.transform.position - transform.position;
             //ignore if behind
@@ -142,29 +129,32 @@ public class Agent : PhysicsObject {
                 float radius = colliders[0][0].radius;
                 float dotProd = Vector3.Dot(vecToTree, transform.right);
                 if (Mathf.Abs(dotProd) < radius + tree.radius) {
-                    ApplyForce(movingPower * OBSTACLE_AVOID_POWER * ((dotProd < 0 ? 1 : -1) * transform.right));
+                    forces += OBSTACLE_AVOID_POWER * ((dotProd < 0 ? 1 : -1) * transform.right);
                 }
             }
         }
+        return forces;
     }
 
     //seperates from all nearby (seperationDistance) agents by apply a force to eachother
     //force is proportional to the distance with maximum force applied nearest to the agent
-    void Seperate() {
+    protected Vector3 Seperate() {
         List<PhysicsObject> agentsInRange = chunk.GetAgentsOfType(
             new[] { tag }).
             FindAll(
             agent => Vector3.Distance(agent.transform.position, transform.position) < maxRunAwayDistance);
-
+        Vector3 SeperateForce = Vector3.zero;
         foreach (Agent agent in agentsInRange) {
             Vector3 dir = agent.transform.position - transform.position;
-            dir = dir.normalized * -1;
+            dir = dir.normalized;
             float distance = Vector3.Distance(agent.transform.position, transform.position);
             float percentForce = distance / (maxRunAwayDistance - avoidanceDistance);
-            ApplyForce(percentForce * movingPower * 2 * dir);
+            SeperateForce += percentForce * 2 * dir;
         }
+        return SeperateForce;
     }
     public override void Update() {
+        totalForces = Vector3.zero;
         //call physics object update
         base.Update();
         if (alive) {
@@ -185,19 +175,21 @@ public class Agent : PhysicsObject {
                         Idle();
                         break;
                     case State.wandering:
-                        Wander();
-                        Seperate();
+                        totalForces += Wander();
+                        totalForces += Seperate();
                         break;
                     case State.fleeing:
-                        Flee();
+                        totalForces += Flee();
                         break;
                     case State.pursuing:
-                        Pursue();
+                        totalForces += Pursue();
                         break;
                 }
-                StayInBounds();
+                totalForces += StayInBounds();
                 if (avoidingObstacles)
-                    AvoidTrees();
+                    totalForces += AvoidTrees();
+
+                ApplyForce(movingPower * totalForces);
 
             }
 
@@ -225,11 +217,12 @@ public class Agent : PhysicsObject {
         }
     }
 
-    protected virtual void Flee() {
+    protected virtual Vector3 Flee() {
         if (target == null) {
             state = State.wandering;
-            return;
+            return Vector3.zero;
         }
+
         Vector3 desiredVelocity;
 
         float xV = transform.position.x - target.position.x;
@@ -238,7 +231,7 @@ public class Agent : PhysicsObject {
 
 
 
-        ApplyForce((desiredVelocity - velocity) * movingPower);
+        return desiredVelocity - velocity;
 
     }
 
@@ -310,7 +303,7 @@ public class Agent : PhysicsObject {
     }
 
 
-    protected virtual void Wander() {
+    protected virtual Vector3 Wander() {
         Vector3 circleCenter;
         circleCenter = new Vector3(velocity.x, velocity.y, velocity.z).normalized * wanderCircleDistance;
 
@@ -323,12 +316,12 @@ public class Agent : PhysicsObject {
 
         Vector3 wanderForce = displacement + circleCenter;
 
-        ApplyForce(wanderForce * movingPower);
+        return wanderForce;
 
     }
-    public virtual void Seek() {
+    public virtual Vector3 Seek() {
         Vector3 desiredVelocity = (target.position - transform.position).normalized * maxSpeed;
-        ApplyForce((desiredVelocity - velocity) * movingPower);
+        return desiredVelocity - velocity;
 
     }
 

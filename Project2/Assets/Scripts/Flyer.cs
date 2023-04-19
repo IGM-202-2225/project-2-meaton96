@@ -35,20 +35,20 @@ public class Flyer : Agent {
 
         acceleration += new Vector3(0f, liftAmount, 0f);
     }
-    protected override void StayInBounds() {
+    protected override Vector3 StayInBounds() {
         var distanceToCenter = Vector3.Distance(
             new Vector3(transform.position.x, 0f, transform.position.z),
             Vector3.zero);
         
         if (distanceToCenter > minBoundsDistance) {
-            ApplyForce(stayInBoundsPower * movingPower * 
+            return stayInBoundsPower * 
                 (distanceToCenter - minBoundsDistance) / (maxBoundsDistance - minBoundsDistance) *
-                new Vector3(-transform.position.x, 0f, -transform.position.z));
+                new Vector3(-transform.position.x, 0f, -transform.position.z);
         }
-
+        return Vector3.zero;
         
     }
-    protected override void AvoidTrees() {}
+    protected override Vector3 AvoidTrees() { return Vector3.zero; }
 
 
 }

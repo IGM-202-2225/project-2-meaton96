@@ -130,13 +130,16 @@ Default and only current state (v0.0.3). The agent wanders around the sky random
 
 Pursuit can be viewed in the Trex class [View TRex.cs on Github](Project2/Assets/Scripts/TRex.cs)
 
--  v0.0.3
+-  0.0.3
 	-  Fixed bug with friction preventing flying dinosaurs from actually moving
 	-  Removed some old variables and updated the JSON to read in new movement variables
 	-  Added obstacle avoidance for the two ground dinosaurs
 		-  This can be enabled or disabled by pressing F3, default=enabled
 	-  Added free camera mode so you can move around more freely and view agents' movement behaviour more easily
 		-  Toggle free camera by pressing Tab
+- 0.0.3.1
+	-  Updated all movement logic to return steering vectors instead of apply their own forces. All forces are summed and finally multiplied by a movingPower scalar. This should be more efficient.
+	-  Seperation now applies a force on itself away from all other agents instead of applying a force to other agents	
 
 ### Requirements not completed
 

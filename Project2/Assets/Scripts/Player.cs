@@ -36,8 +36,8 @@ public class Player : PhysicsObject {
         frictionAmount = movingPower * frictionPercent;
         gravityEnabled = true;
         mass = 50;
-        speed = 10;
-        jumpingPower = 50000f;
+        speed = 20;
+        jumpingPower = 35000f;
         Cursor.lockState = CursorLockMode.Locked;
         freeCam = false;
         

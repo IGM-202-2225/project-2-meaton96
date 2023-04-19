@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour {
 
-    public string buildNumber = "0.0.3";
+    public string buildNumber = "0.0.3.1";
 
     public int numChunks = 64;
     public int startingPoint = -1024;
@@ -107,7 +107,7 @@ public class GameController : MonoBehaviour {
     }
 
     private IEnumerator SpawnAgents() {
-        int numAgentsToSpawn = 50;
+        int numAgentsToSpawn = 150;
         for (int x = 0; x < numAgentsToSpawn; x++) {
             //SpawnAgent(x % agentPrefabs.Count);
             SpawnAgent(dinoIndex);

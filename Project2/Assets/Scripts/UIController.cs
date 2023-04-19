@@ -20,6 +20,6 @@ public class UIController : MonoBehaviour
     {
         DinoText.text = gameController.agentPrefabs[gameController.dinoIndex].name.ToString();
         avoidText.text = "Avoiding Obstacles:\n" + gameController.agentsAvoidObj;
-        buildText.text = "Build Number: " + gameController.buildNumber;
+        buildText.text = "Build Number: " + gameController.buildNumber; 
     }
 }
