@@ -38,6 +38,9 @@ public class Chunk {
     public void RemoveAgentFromChunk(Agent agent) {
         agents.Remove(agent);
     }
+    public void AddTree(TreeObject tree) {
+        trees.Add(tree);
+    }
     public List<PhysicsObject> GetAgentsOfType(IEnumerable<string> tags) {
 
 
