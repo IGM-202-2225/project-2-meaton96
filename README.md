@@ -139,7 +139,9 @@ Pursuit can be viewed in the Trex class [View TRex.cs on Github](Project2/Assets
 		-  Toggle free camera by pressing Tab
 - 0.0.3.1
 	-  Updated all movement logic to return steering vectors instead of apply their own forces. All forces are summed and finally multiplied by a movingPower scalar. This should be more efficient.
-	-  Seperation now applies a force on itself away from all other agents instead of applying a force to other agents	
+	-  Seperation now applies a force on itself away from all other agents instead of applying a force to other agents--
+- 0.0.4
+	-  Fixed Seperation bug that was causing it to not function properly	
 
 ### Requirements not completed
 

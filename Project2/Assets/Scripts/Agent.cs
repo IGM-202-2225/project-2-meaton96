@@ -8,12 +8,12 @@ using UnityEngine;
 public class Agent : PhysicsObject {
     protected Animator animator;                                        //pointer to animator to change animations
     [SerializeField] protected float movingPower;                       //how strong in Newtons? to call ApplyForce
-     protected Transform target;                                         //current target, agent will run towards this if in chasing state
+    protected Transform target;                                         //current target, agent will run towards this if in chasing state
                                                                         // protected List<Agent> avoidAgents, targetAgents;                    
                                                                         // protected float runningSpeedMultiplier;                             
     protected float maxSpeed;                                           //speed cap, velocity magnitude will not exceed this value
     protected float maxSpeedWander;                                     //an initial position to run away from, this may be a sound (gunshot or something from player) 
-                                                                         //or a sighting of another actor from the avoidAgents list
+                                                                        //or a sighting of another actor from the avoidAgents list
     protected float maxRunAwayDistance;                                 //how far away from the initial runningFrom position to get before going back to wandering
     protected float avoidanceDistance;                                  //how close to get to another agent before triggering a seperation 
     protected float stateTimer, stateSwitchTimer;                       //trackers to randomly swap between Idle and Wander states, 50/50 every time at the end of stateSiwtchTimer
@@ -136,29 +136,34 @@ public class Agent : PhysicsObject {
         return forces;
     }
 
-    //seperates from all nearby (seperationDistance) agents by apply a force to eachother
-    //force is proportional to the distance with maximum force applied nearest to the agent
+    //currently working similar to flock woops
     protected Vector3 Seperate() {
         List<PhysicsObject> agentsInRange = chunk.GetAgentsOfType(
             new[] { tag }).
             FindAll(
             agent => Vector3.Distance(agent.transform.position, transform.position) < maxRunAwayDistance);
         Vector3 SeperateForce = Vector3.zero;
-        foreach (Agent agent in agentsInRange) {
+        foreach (Agent agent in agentsInRange.Cast<Agent>()) {
             Vector3 dir = agent.transform.position - transform.position;
-            dir = dir.normalized;
-            float distance = Vector3.Distance(agent.transform.position, transform.position);
-            float percentForce = distance / (maxRunAwayDistance - avoidanceDistance);
-            SeperateForce += percentForce * 2 * dir;
+            dir = -dir.normalized;
+            //float distance = Vector3.Distance(agent.transform.position, transform.position);
+            //float percentForce = distance / (maxRunAwayDistance - avoidanceDistance);
+            SeperateForce = 1 * 4 * dir;
         }
+
         return SeperateForce;
     }
+
+
     public override void Update() {
         totalForces = Vector3.zero;
         //call physics object update
         base.Update();
         if (alive) {
-
+            Chunk temp = gameController.GetChunk(transform.position);
+            if (chunk != temp) {
+                UpdateChunk(temp);
+            }
 
             UpdateSphereCollider();
             CheckCollisionWithOtherAgents();
@@ -176,6 +181,7 @@ public class Agent : PhysicsObject {
                         break;
                     case State.wandering:
                         totalForces += Wander();
+                        //Seperate();
                         totalForces += Seperate();
                         break;
                     case State.fleeing:
@@ -299,7 +305,9 @@ public class Agent : PhysicsObject {
             stateTimer += Time.deltaTime;
     }
     public void UpdateChunk(Chunk chunk) {
+        this.chunk.RemoveAgentFromChunk(this);
         this.chunk = chunk;
+        chunk.AddAgent(this);
     }
 
 

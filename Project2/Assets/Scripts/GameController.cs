@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour {
 
-    public string buildNumber = "0.0.3.1";                                                      //build number to display on screen to make checking build pushes easier
+    public string buildNumber = "0.0.4";                                                      //build number to display on screen to make checking build pushes easier
     public float DEFAULT_GRAVITY = 10f;                                                         //default gravity value
 
     public int numChunks = 64;                                                                  //number of chunks of the map
@@ -43,7 +43,7 @@ public class GameController : MonoBehaviour {
         for (int x = 0; x < chunks.Length; x++) {
             for (int z = 0; z < chunks[x].Length; z++) {
                 chunks[x][z] = new Chunk(this, x, z);
-                chunks[x][z].Update();
+               // chunks[x][z].Update();
             }
         }
         //gets the chunk of each tree and add 
@@ -60,7 +60,7 @@ public class GameController : MonoBehaviour {
     // Update is called once per frame
     void Update() {
 
-        UpdateChunks();
+       // UpdateChunks();
 
         //toggle on or off movement logic for all agents
         if (Input.GetKeyDown(KeyCode.F1)) {
@@ -75,10 +75,10 @@ public class GameController : MonoBehaviour {
         //start spawn agent coroutine to spawn a bunch of agents
         //also increase the gravity by 5 times to have the agents drop quickly
         if (Input.GetKeyDown(KeyCode.F2)) {
-            StartCoroutine(SpawnAgents());
+            StartCoroutine(SpawnAgents());   
          //   gravityAmount *= 5f;
             
-            UpdateChunks();
+           // UpdateChunks();
         }
         //toggle obstacle avoidance for all agents
         if (Input.GetKeyDown(KeyCode.F3)) {
@@ -102,6 +102,14 @@ public class GameController : MonoBehaviour {
                         }
                     }
                 }
+            }
+        }
+        if (Input.GetKeyDown(KeyCode.F5)) {
+            for (int x = 0; x < 2; x++) {
+                SpawnAgent(0, new Vector3(
+                    Camera.main.transform.position.x + x * 2,
+                    0,
+                    Camera.main.transform.position.z));
             }
         }
         //change the selected dinosaur to spawn
@@ -141,7 +149,7 @@ public class GameController : MonoBehaviour {
         float xLoc = UnityEngine.Random.Range(-radius, radius);
         float zLoc = UnityEngine.Random.Range(-radius, radius);
 
-        float minY = 5, maxY = 10;
+        float minY = 2, maxY = 5;
 
         if (agentNum == 2) {
             minY += 35;
@@ -150,23 +158,29 @@ public class GameController : MonoBehaviour {
 
         float yLoc = terrain.SampleHeight(new Vector3(xLoc, 0f, zLoc)) + UnityEngine.Random.Range(minY, maxY);
         GameObject agent = Instantiate(agentPrefabs[agentNum], new Vector3(xLoc, yLoc, zLoc), Quaternion.identity);
+        agent.GetComponent<Agent>().UpdateChunk(GetChunk(agent.transform.position));
+    }
+    private void SpawnAgent(int agentNum, Vector3 location) {
+        float yLoc = terrain.SampleHeight(new Vector3(location.x, 0f, location.z)) + 1;
+        GameObject agent = Instantiate(agentPrefabs[agentNum], new Vector3(location.x, yLoc, location.z), Quaternion.identity);
+        agent.GetComponent<Agent>().UpdateChunk(GetChunk(agent.transform.position));
     }
     //calls every chunk's update method every updateTime seconds
-    public void UpdateChunks() {
-        if (updateTime >= updateTimer) {
-            updateTimer = 0;
-            for (int x = 0; x < chunks.Length; x++) {
-                for (int y = 0; y < chunks[0].Length; y++) {
-                    //Debug.Log(chunks[x][y]);
-                    chunks[x][y].Update();
-                }
-            }
+    //public void UpdateChunks() {
+    //    if (updateTime >= updateTimer) {
+    //        updateTimer = 0;
+    //        for (int x = 0; x < chunks.Length; x++) {
+    //            for (int y = 0; y < chunks[0].Length; y++) {
+    //                //Debug.Log(chunks[x][y]);
+    //                chunks[x][y].Update();
+    //            }
+    //        }
 
-        }
-        else {
-            updateTime += Time.deltaTime;
-        }
-    }
+    //    }
+    //    else {
+    //        updateTime += Time.deltaTime;
+    //    }
+    //}
     //returns the chunk that the given vector position is located in
     public Chunk GetChunk(Vector3 pos) {
         int x = ((int)pos.x - startingPoint) / multi;

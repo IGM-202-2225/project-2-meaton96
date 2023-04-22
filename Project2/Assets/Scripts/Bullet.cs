@@ -55,7 +55,7 @@ public class Bullet : PhysicsObject {
                     obj.alive = false;
                     obj.isActive = false;
 
-                    gameController.GetChunk(transform.position).Update();
+                    //gameController.GetChunk(transform.position).Update();
                     Destroy(gameObject);
                     break;
                 }

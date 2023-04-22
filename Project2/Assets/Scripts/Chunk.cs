@@ -19,7 +19,7 @@ public class Chunk {
             0,
             gameController.startingPoint + z * gameController.multi);
         trees = new();
-
+        agents = new();
         this.x = x;
         this.z = z;
     }
@@ -29,14 +29,21 @@ public class Chunk {
             && pos.z > bottomLeft.z && pos.y < bottomLeft.y + WIDTH;
     }
     public void Update() {
-        agents = new();
-        agents = gameController.agents.Where(agent => IsInChunk(agent.transform.position)).Cast<Agent>().ToList();
-        agents.ForEach(agent => agent.UpdateChunk(this));
-
+     //   agents = new();
+       // agents = gameController.agents.Where(agent => IsInChunk(agent.transform.position)).Cast<Agent>().ToList();
+     //   agents.ForEach(agent => agent.UpdateChunk(this));
+        foreach (Agent agent in agents) {
+            if (!agent.alive) {
+                RemoveAgentFromChunk(agent);
+            }
+        }
 
     }
     public void RemoveAgentFromChunk(Agent agent) {
         agents.Remove(agent);
+    }
+    public void AddAgent(Agent agent) {
+        agents.Add(agent);
     }
     public void AddTree(TreeObject tree) {
         trees.Add(tree);
