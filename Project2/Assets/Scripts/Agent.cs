@@ -40,7 +40,7 @@ public class Agent : PhysicsObject {
     protected const float AVOID_DISTANCE = 25f, OBSTACLE_AVOID_POWER = .6f;
 
     public bool avoidingObstacles = true;
-
+    float sperateMulti = 40f;
     protected Chunk chunk;
 
     public bool alive = true;
@@ -105,7 +105,7 @@ public class Agent : PhysicsObject {
                 maxAngle = angle;
             }
         }
-        return new Vector3(Mathf.Cos(maxAngle), 0f, Mathf.Sin(maxAngle));
+        return new Vector3(Mathf.Cos(maxAngle), 0f, Mathf.Sin(maxAngle)).normalized;
 
     }
     //Obstacle Avoidance
@@ -136,22 +136,25 @@ public class Agent : PhysicsObject {
         return forces;
     }
 
-    //currently working similar to flock woops
-    protected Vector3 Seperate() {
-        List<PhysicsObject> agentsInRange = chunk.GetAgentsOfType(
-            new[] { tag }).
-            FindAll(
-            agent => Vector3.Distance(agent.transform.position, transform.position) < maxRunAwayDistance);
-        Vector3 SeperateForce = Vector3.zero;
-        foreach (Agent agent in agentsInRange.Cast<Agent>()) {
-            Vector3 dir = agent.transform.position - transform.position;
-            dir = -dir.normalized;
-            //float distance = Vector3.Distance(agent.transform.position, transform.position);
-            //float percentForce = distance / (maxRunAwayDistance - avoidanceDistance);
-            SeperateForce = 1 * 4 * dir;
+    //?????
+    protected virtual Vector3 Seperate() {
+        List<string> tags = new() { tag };
+        Vector3 seperateForce = Vector3.zero;
+        var agentsInRange = FilterAgentsByRangeAndTag(avoidanceDistance, tags);
+
+        if (agentsInRange.Count == 0)
+            return Vector3.zero;
+
+
+        foreach (Agent agent in agentsInRange) {
+            Vector3 dir = (transform.position - agent.transform.position).normalized;
+            dir *= maxSpeed / Vector3.Distance(transform.position, agent.transform.position);
+            seperateForce += dir;
         }
 
-        return SeperateForce;
+        seperateForce /= agentsInRange.Count;
+
+        return seperateForce * sperateMulti;
     }
 
 
@@ -169,7 +172,7 @@ public class Agent : PhysicsObject {
             CheckCollisionWithOtherAgents();
             if (isActive) {
 
-                if (velocity.magnitude > 0) {
+                if (velocity.magnitude > 0.10f) {
                     transform.rotation = Quaternion.LookRotation(direction);
                 }
 
@@ -181,8 +184,8 @@ public class Agent : PhysicsObject {
                         break;
                     case State.wandering:
                         totalForces += Wander();
-                        //Seperate();
                         totalForces += Seperate();
+                        totalForces += Flock();
                         break;
                     case State.fleeing:
                         totalForces += Flee();
@@ -239,6 +242,9 @@ public class Agent : PhysicsObject {
 
         return desiredVelocity - velocity;
 
+    }
+    protected virtual Vector3 Flock() {
+        return Vector3.zero;
     }
 
     //assign class data fields that determine movement logic based on the passed in class name
@@ -327,8 +333,8 @@ public class Agent : PhysicsObject {
         return wanderForce;
 
     }
-    public virtual Vector3 Seek() {
-        Vector3 desiredVelocity = (target.position - transform.position).normalized * maxSpeed;
+    public virtual Vector3 Seek(Vector3 seekTarget) {
+        Vector3 desiredVelocity = (seekTarget - transform.position).normalized * maxSpeed;
         return desiredVelocity - velocity;
 
     }
@@ -398,6 +404,13 @@ public class Agent : PhysicsObject {
             }
         }
         return false;
+    }
+    protected List<Agent> FilterAgentsByRangeAndTag(float range, List<string> tags) {
+        var targetAgents = chunk.GetAgentsOfType(tags);
+
+        targetAgents.Remove(this);
+        
+        return targetAgents.Where(agent => Vector3.Distance(transform.position, agent.transform.position) < range).Cast<Agent>().ToList();
     }
 
 

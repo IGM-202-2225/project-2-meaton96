@@ -7,22 +7,23 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour {
 
-    public string buildNumber = "0.0.4";                                                      //build number to display on screen to make checking build pushes easier
+    public string buildNumber = "0.1";                                                      //build number to display on screen to make checking build pushes easier
     public float DEFAULT_GRAVITY = 10f;                                                         //default gravity value
 
-    public int numChunks = 64;                                                                  //number of chunks of the map
+    public int numChunks = 16;                                                                  //number of chunks of the map
     public int startingPoint = -1024;                                                           //starting x,y point, terrain's corner
     public int multi;
     [SerializeField] private TextAsset agentDataJson;                                           //reference to the JSON file containing the agent data
     public List<GameObject> agentPrefabs;                                                       //list of all available agent prefabs to instantiate
     public int dinoIndex = 2;                                                                   //tracker for which dinosaur to spawn
-    public Chunk[][] chunks = new Chunk[8][];                                                   //holds every chunk 
-    private float updateTimer, updateTime = 5f;                                                 //update variables for updating chunks
+    public Chunk[][] chunks;                                                                   //holds every chunk 
+    //private float updateTimer, updateTime = 5f;                                                 //update variables for updating chunks
     private Terrain terrain;                                                                    //reference to the terrain object
     public bool agentsAvoidObj = true;                                                          //whether or not agent obstacle avoidance is enabled
     public float gravityAmount;                                                                 //the current gravity amount
     // Start is called before the first frame update
     void Start() {
+        chunks = new Chunk[(int)Mathf.Sqrt(numChunks)][];
         //tell the MyJsonUtility static class to parse all of the json data from the file
         MyJsonUtility.SetJsonText(agentDataJson.text);
         MyJsonUtility.ParseAllJson();
@@ -43,7 +44,7 @@ public class GameController : MonoBehaviour {
         for (int x = 0; x < chunks.Length; x++) {
             for (int z = 0; z < chunks[x].Length; z++) {
                 chunks[x][z] = new Chunk(this, x, z);
-               // chunks[x][z].Update();
+               //chunks[x][z].Update();
             }
         }
         //gets the chunk of each tree and add 
@@ -75,7 +76,7 @@ public class GameController : MonoBehaviour {
         //start spawn agent coroutine to spawn a bunch of agents
         //also increase the gravity by 5 times to have the agents drop quickly
         if (Input.GetKeyDown(KeyCode.F2)) {
-            StartCoroutine(SpawnAgents());   
+            StartCoroutine(SpawnAgents(150));   
          //   gravityAmount *= 5f;
             
            // UpdateChunks();
@@ -105,12 +106,7 @@ public class GameController : MonoBehaviour {
             }
         }
         if (Input.GetKeyDown(KeyCode.F5)) {
-            for (int x = 0; x < 2; x++) {
-                SpawnAgent(0, new Vector3(
-                    Camera.main.transform.position.x + x * 2,
-                    0,
-                    Camera.main.transform.position.z));
-            }
+                StartCoroutine(SpawnAgentsAtCamera(5));
         }
         //change the selected dinosaur to spawn
         if (Input.GetKeyDown(KeyCode.UpArrow)) {
@@ -123,6 +119,20 @@ public class GameController : MonoBehaviour {
         }
 
     }
+    private IEnumerator SpawnAgentsAtCamera(int numAgentsToSpawn) {
+
+        for (int x = 0; x < numAgentsToSpawn; x++) {
+            //SpawnAgent(x % agentPrefabs.Count);
+            var height = terrain.SampleHeight(Camera.main.transform.position);
+            var pos = new Vector3(
+                Camera.main.transform.position.x + x * 5, 
+                height, 
+                Camera.main.transform.position.z + x * 5);
+            SpawnAgent(dinoIndex, pos);
+            yield return new WaitForEndOfFrame();
+        }
+        //  StartCoroutine(ResetGravityAfterSeconds(10));
+    }
     //drop gravity back to default after seconds
     private IEnumerator ResetGravityAfterSeconds(int seconds) {
         for (int x = 0; x < seconds; x++) {
@@ -131,8 +141,8 @@ public class GameController : MonoBehaviour {
         gravityAmount = DEFAULT_GRAVITY;
     }
     //Spawn 150 agents of the currently selected type
-    private IEnumerator SpawnAgents() {
-        int numAgentsToSpawn = 150;
+    private IEnumerator SpawnAgents(int numAgentsToSpawn) {
+       
         for (int x = 0; x < numAgentsToSpawn; x++) {
             //SpawnAgent(x % agentPrefabs.Count);
             SpawnAgent(dinoIndex);
@@ -185,7 +195,9 @@ public class GameController : MonoBehaviour {
     public Chunk GetChunk(Vector3 pos) {
         int x = ((int)pos.x - startingPoint) / multi;
         int z = ((int)pos.z - startingPoint) / multi;
+        
         if (x < 0 || z < 0 || x > chunks.Length || z > chunks[0].Length) {
+            Debug.Log(x + ", " + z);
             throw new ArgumentException();
             
         }

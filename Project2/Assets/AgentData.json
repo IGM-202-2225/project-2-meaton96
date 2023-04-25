@@ -397,5 +397,146 @@
       "level": 0,
       "vitalLevel": 0
     }
+  },
+  "?velociraptor": {
+    "classdata": {
+      "runningSpeedMultiplier": 3,
+      "maxSpeed": 4,
+      "maxRunAwayDistance": 150,
+      "avoidanceDistance": 100,
+      "mass": 400,
+      "movementPower": 1500,
+      "circleDistance": 1,
+      "circleRadius": 2.5,
+      "angleChange": 0.250
+    },
+    "collider1": {
+      "x": 0.2,
+      "y": 0.2,
+      "z": -0.1,
+      "radius": 0.2,
+      "level": 2,
+      "vitalLevel": 1
+    },
+    "collider2": {
+      "x": -0.2,
+      "y": 0.2,
+      "z": -0.1,
+      "radius": 0.2,
+      "level": 2,
+      "vitalLevel": 1
+    },
+    "collider3": {
+      "x": 0.2,
+      "y": 0.6,
+      "z": 0.1,
+      "radius": 0.2,
+      "level": 2,
+      "vitalLevel": 1
+    },
+    "collider4": {
+      "x": -0.2,
+      "y": 0.6,
+      "z": 0.1,
+      "radius": 0.2,
+      "level": 2,
+      "vitalLevel": 1
+    },
+    "collider5": {
+      "x": 0,
+      "y": 1,
+      "z": 0.15,
+      "radius": 0.35,
+      "level": 2,
+      "vitalLevel": 3
+    },
+    "collider6": {
+      "x": 0,
+      "y": 1.07,
+      "z": -0.35,
+      "radius": 0.2,
+      "level": 2,
+      "vitalLevel": 3
+    },
+    "collider7": {
+      "x": 0,
+      "y": 1.1,
+      "z": -0.6,
+      "radius": 0.15,
+      "level": 2,
+      "vitalLevel": 1
+    },
+    "collider8": {
+      "x": 0,
+      "y": 1.05,
+      "z": 0.5,
+      "radius": 0.25,
+      "level": 2,
+      "vitalLevel": 3
+    },
+    "collider9": {
+      "x": 0,
+      "y": 1.25,
+      "z": 0.8,
+      "radius": 0.17,
+      "level": 2,
+      "vitalLevel": 3
+    },
+    "collider10": {
+      "x": 0,
+      "y": 1.25,
+      "z": 1,
+      "radius": 0.2,
+      "level": 2,
+      "vitalLevel": 3
+    },
+    "collider11": {
+      "x": 0,
+      "y": 1.45,
+      "z": 1.25,
+      "radius": 0.15,
+      "level": 2,
+      "vitalLevel": 3
+    },
+    "collider12": {
+      "x": 0,
+      "y": 1.45,
+      "z": 1.05,
+      "radius": 0.4,
+      "level": 1,
+      "vitalLevel": 1
+    },
+    "collider13": {
+      "x": 0,
+      "y": 1,
+      "z": 0.6,
+      "radius": 0.5,
+      "level": 1,
+      "vitalLevel": 1
+    },
+    "collider14": {
+      "x": 0,
+      "y": 1,
+      "z": -0.4,
+      "radius": 0.5,
+      "level": 1,
+      "vitalLevel": 1
+    },
+    "collider15": {
+      "x": 0,
+      "y": 0.5,
+      "z": 0,
+      "radius": 0.6,
+      "level": 1,
+      "vitalLevel": 1
+    },
+    "collider16": {
+      "x": 0,
+      "y": 1,
+      "z": -0.3,
+      "radius": 1.8,
+      "level": 0,
+      "vitalLevel": 0
+    }
   }
 }

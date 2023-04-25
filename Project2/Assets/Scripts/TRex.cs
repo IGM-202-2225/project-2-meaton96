@@ -7,7 +7,6 @@ using UnityEngine;
 public class TRex : Agent {
 
     public float huntDistance = 500f;
-    private const float DISTANCE_TO_STOP_PREDICT = 4f;
     public bool isHunting = false;
     protected override void Awake() {
 
@@ -20,11 +19,8 @@ public class TRex : Agent {
         if (isHunting) {
             if (pollTimer > agentPollRate) {
                 pollTimer = 0;
-                var targetAgents = chunk.
-                    GetAgentsOfType(targetTags);
 
-
-                var nearbyTargetAgents = targetAgents.Where(agent => Vector3.Distance(transform.position, agent.transform.position) < huntDistance).ToList();
+                var nearbyTargetAgents = FilterAgentsByRangeAndTag(huntDistance, targetTags);
 
                 if (nearbyTargetAgents.Any()) {
                     int index = Random.Range(0, nearbyTargetAgents.Count());
