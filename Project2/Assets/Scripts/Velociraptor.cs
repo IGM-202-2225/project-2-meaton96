@@ -8,6 +8,15 @@ public class Velociraptor : Agent {
     public float huntDistance = 300f;
     public bool isHunting = false;
     protected float flockRange = 50f;
+
+    [Range(0f, 2f)]
+    public  float sepMulti = 0f;
+    [Range(0f, 2f)]
+    public float aliMulti = 1f;
+    [Range(0f, 2f)]
+    public float cohMulti = 1f;
+
+
     protected override void Awake() {
         AssignClassData("velociraptor");
         targetTags = new(new string[] { "SmallHerbivore" });
@@ -55,9 +64,7 @@ public class Velociraptor : Agent {
     }
     protected override Vector3 Flock() {
 
-        float sepMulti = 0f;
-        float aliMulti = 1f;
-        float cohMulti = 1f;
+        
 
         return Seperate() * sepMulti +
                 Align() * aliMulti +

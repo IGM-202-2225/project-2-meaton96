@@ -21,6 +21,8 @@ public class GameController : MonoBehaviour {
     private Terrain terrain;                                                                    //reference to the terrain object
     public bool agentsAvoidObj = true;                                                          //whether or not agent obstacle avoidance is enabled
     public float gravityAmount;                                                                 //the current gravity amount
+    public bool mainMenu;
+
     // Start is called before the first frame update
     void Start() {
         chunks = new Chunk[(int)Mathf.Sqrt(numChunks)][];
@@ -44,7 +46,7 @@ public class GameController : MonoBehaviour {
         for (int x = 0; x < chunks.Length; x++) {
             for (int z = 0; z < chunks[x].Length; z++) {
                 chunks[x][z] = new Chunk(this, x, z);
-               //chunks[x][z].Update();
+                //chunks[x][z].Update();
             }
         }
         //gets the chunk of each tree and add 
@@ -54,70 +56,72 @@ public class GameController : MonoBehaviour {
             }
         }
 
-       // agents = new();
+        // agents = new();
     }
 
 
     // Update is called once per frame
     void Update() {
 
-       // UpdateChunks();
+        if (mainMenu) {
 
-        //toggle on or off movement logic for all agents
-        if (Input.GetKeyDown(KeyCode.F1)) {
-            foreach (var chunkRow in chunks) {
-                foreach (var chunk in chunkRow) {
-                    foreach (var agent in chunk.agents) {
-                        agent.ToggleAI();
-                    }
-                }
-            }
         }
-        //start spawn agent coroutine to spawn a bunch of agents
-        //also increase the gravity by 5 times to have the agents drop quickly
-        if (Input.GetKeyDown(KeyCode.F2)) {
-            StartCoroutine(SpawnAgents(150));   
-         //   gravityAmount *= 5f;
-            
-           // UpdateChunks();
-        }
-        //toggle obstacle avoidance for all agents
-        if (Input.GetKeyDown(KeyCode.F3)) {
-            foreach (var chunkRow in chunks) {
-                foreach (var chunk in chunkRow) {
-                    foreach (var agent in chunk.agents) {
-                        agent.avoidingObstacles = !agent.avoidingObstacles;
-                        agentsAvoidObj = !agentsAvoidObj;
-                    }
-                }
-            }
-        }
-        //toggles on the hunting function for trexs
-        //its off by default to allow agents time to drop and spread out before starting pursuit logic
-        if (Input.GetKeyDown(KeyCode.F4)) {
-            foreach (Chunk[] chunkRow in chunks) {
-                foreach (Chunk chunk in chunkRow) {
-                    foreach(Agent agent in chunk.agents) {
-                        if (agent is TRex rex) {
-                            rex.isHunting = true;
+        else {
+            //toggle on or off movement logic for all agents
+            if (Input.GetKeyDown(KeyCode.F1)) {
+                foreach (var chunkRow in chunks) {
+                    foreach (var chunk in chunkRow) {
+                        foreach (var agent in chunk.agents) {
+                            agent.ToggleAI();
                         }
                     }
                 }
             }
-        }
-        if (Input.GetKeyDown(KeyCode.F5)) {
-                StartCoroutine(SpawnAgentsAtCamera(5));
-        }
-        //change the selected dinosaur to spawn
-        if (Input.GetKeyDown(KeyCode.UpArrow)) {
-            dinoIndex++;
-            if (dinoIndex >= agentPrefabs.Count) { dinoIndex = 0; }
-        }
-        if (Input.GetKeyDown(KeyCode.DownArrow)) {
-            dinoIndex--;
-            if (dinoIndex < 0) { dinoIndex = agentPrefabs.Count - 1; }
-        }
+            //start spawn agent coroutine to spawn a bunch of agents
+            //also increase the gravity by 5 times to have the agents drop quickly
+            if (Input.GetKeyDown(KeyCode.F2)) {
+                StartCoroutine(SpawnAgents(150));
+                //   gravityAmount *= 5f;
 
+                // UpdateChunks();
+            }
+            //toggle obstacle avoidance for all agents
+            if (Input.GetKeyDown(KeyCode.F3)) {
+                foreach (var chunkRow in chunks) {
+                    foreach (var chunk in chunkRow) {
+                        foreach (var agent in chunk.agents) {
+                            agent.avoidingObstacles = !agent.avoidingObstacles;
+                            agentsAvoidObj = !agentsAvoidObj;
+                        }
+                    }
+                }
+            }
+            //toggles on the hunting function for trexs
+            //its off by default to allow agents time to drop and spread out before starting pursuit logic
+            if (Input.GetKeyDown(KeyCode.F4)) {
+                foreach (Chunk[] chunkRow in chunks) {
+                    foreach (Chunk chunk in chunkRow) {
+                        foreach (Agent agent in chunk.agents) {
+                            if (agent is TRex rex) {
+                                rex.isHunting = true;
+                            }
+                        }
+                    }
+                }
+            }
+            if (Input.GetKeyDown(KeyCode.F5)) {
+                StartCoroutine(SpawnAgentsAtCamera(5));
+            }
+            //change the selected dinosaur to spawn
+            if (Input.GetKeyDown(KeyCode.UpArrow)) {
+                dinoIndex++;
+                if (dinoIndex >= agentPrefabs.Count) { dinoIndex = 0; }
+            }
+            if (Input.GetKeyDown(KeyCode.DownArrow)) {
+                dinoIndex--;
+                if (dinoIndex < 0) { dinoIndex = agentPrefabs.Count - 1; }
+            }
+        }
     }
     private IEnumerator SpawnAgentsAtCamera(int numAgentsToSpawn) {
 
@@ -125,8 +129,8 @@ public class GameController : MonoBehaviour {
             //SpawnAgent(x % agentPrefabs.Count);
             var height = terrain.SampleHeight(Camera.main.transform.position);
             var pos = new Vector3(
-                Camera.main.transform.position.x + x * 5, 
-                height, 
+                Camera.main.transform.position.x + x * 5,
+                height,
                 Camera.main.transform.position.z + x * 5);
             SpawnAgent(dinoIndex, pos);
             yield return new WaitForEndOfFrame();
@@ -141,19 +145,29 @@ public class GameController : MonoBehaviour {
         gravityAmount = DEFAULT_GRAVITY;
     }
     //Spawn 150 agents of the currently selected type
-    private IEnumerator SpawnAgents(int numAgentsToSpawn) {
-       
+    public IEnumerator SpawnAgents(int numAgentsToSpawn) {
+
         for (int x = 0; x < numAgentsToSpawn; x++) {
             //SpawnAgent(x % agentPrefabs.Count);
             SpawnAgent(dinoIndex);
             yield return new WaitForEndOfFrame();
         }
-      //  StartCoroutine(ResetGravityAfterSeconds(10));
+        //  StartCoroutine(ResetGravityAfterSeconds(10));
+    }
+    public IEnumerator SpawnAgents(int dinoIndex, int numAgentsToSpawn, Action<int> flag) {
+
+        for (int x = 0; x < numAgentsToSpawn; x++) {
+            //SpawnAgent(x % agentPrefabs.Count);
+            SpawnAgent(dinoIndex);
+            yield return new WaitForEndOfFrame();
+        }
+        flag(dinoIndex);
+        //  StartCoroutine(ResetGravityAfterSeconds(10));
     }
     //Spawns a single agent of type agentNum from the prefab list
     //at a random location within the circle defined by radius
     private void SpawnAgent(int agentNum) {
-        
+
         float radius = 700;
 
         float xLoc = UnityEngine.Random.Range(-radius, radius);
@@ -195,13 +209,16 @@ public class GameController : MonoBehaviour {
     public Chunk GetChunk(Vector3 pos) {
         int x = ((int)pos.x - startingPoint) / multi;
         int z = ((int)pos.z - startingPoint) / multi;
-        
+
         if (x < 0 || z < 0 || x > chunks.Length || z > chunks[0].Length) {
             Debug.Log(x + ", " + z);
             throw new ArgumentException();
-            
+
         }
         return chunks[x][z];
+    }
+    public void Drop() {
+
     }
 
 }
