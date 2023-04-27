@@ -15,9 +15,9 @@ public class Chunk {
     public Chunk(GameController gc, int x, int z) {
         gameController = gc;
         bottomLeft = new Vector3(
-            gameController.startingPoint + x * gameController.multi,
+            gameController.startingPoint + x * gameController.chunkDimension,
             0,
-            gameController.startingPoint + z * gameController.multi);
+            gameController.startingPoint + z * gameController.chunkDimension);
         trees = new();
         agents = new();
         this.x = x;

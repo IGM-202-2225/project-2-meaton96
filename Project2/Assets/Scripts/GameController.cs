@@ -1,18 +1,19 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameController : MonoBehaviour {
 
-    public string buildNumber = "0.1";                                                      //build number to display on screen to make checking build pushes easier
     public float DEFAULT_GRAVITY = 10f;                                                         //default gravity value
 
     public int numChunks = 16;                                                                  //number of chunks of the map
     public int startingPoint = -1024;                                                           //starting x,y point, terrain's corner
-    public int multi;
+    public int chunkDimension;
     [SerializeField] private TextAsset agentDataJson;                                           //reference to the JSON file containing the agent data
     public List<GameObject> agentPrefabs;                                                       //list of all available agent prefabs to instantiate
     public int dinoIndex = 2;                                                                   //tracker for which dinosaur to spawn
@@ -21,10 +22,17 @@ public class GameController : MonoBehaviour {
     private Terrain terrain;                                                                    //reference to the terrain object
     public bool agentsAvoidObj = true;                                                          //whether or not agent obstacle avoidance is enabled
     public float gravityAmount;                                                                 //the current gravity amount
-    public bool mainMenu;
+    public bool mainMenu = true;
+    public Player player;
+  //  private NumDinoScript numDinoScript;
+    private bool[] finishedSpawning = { false, false, false, false };
+
+    private readonly int[] NUM_DINO_TO_SPAWN = { 100, 100, 100, 100 };
+    [SerializeField] private GameObject uiComponents;
 
     // Start is called before the first frame update
     void Start() {
+       // numDinoScript = GameObject.FindWithTag("Info").GetComponent<NumDinoScript>();   
         chunks = new Chunk[(int)Mathf.Sqrt(numChunks)][];
         //tell the MyJsonUtility static class to parse all of the json data from the file
         MyJsonUtility.SetJsonText(agentDataJson.text);
@@ -42,7 +50,7 @@ public class GameController : MonoBehaviour {
 
         //create new chunks and call their update methods
         int numRows = (int)Mathf.Sqrt(numChunks);
-        multi = startingPoint * -2 / numRows;
+        chunkDimension = startingPoint * -2 / numRows;
         for (int x = 0; x < chunks.Length; x++) {
             for (int z = 0; z < chunks[x].Length; z++) {
                 chunks[x][z] = new Chunk(this, x, z);
@@ -55,16 +63,25 @@ public class GameController : MonoBehaviour {
                 GetChunk(tree.transform.position).AddTree(tree.GetComponent<TreeObject>());
             }
         }
+        for (int x = 0; x < agentPrefabs.Count; x++) {
+            StartCoroutine(SpawnAgents(x, NUM_DINO_TO_SPAWN[x], FlagDoneSpawning)); 
+        }
 
         // agents = new();
     }
-
+    private void FlagDoneSpawning(int dinoNum) {
+        finishedSpawning[dinoNum] = true;
+    }
 
     // Update is called once per frame
     void Update() {
 
         if (mainMenu) {
-
+            if (AllSpawned()) {
+                uiComponents.SetActive(false);
+                mainMenu = false;
+                Drop();
+            }
         }
         else {
             //toggle on or off movement logic for all agents
@@ -139,29 +156,31 @@ public class GameController : MonoBehaviour {
     }
     //drop gravity back to default after seconds
     private IEnumerator ResetGravityAfterSeconds(int seconds) {
-        for (int x = 0; x < seconds; x++) {
-            yield return new WaitForSeconds(1);
-        }
+        yield return new WaitForSeconds(seconds);
         gravityAmount = DEFAULT_GRAVITY;
     }
     //Spawn 150 agents of the currently selected type
     public IEnumerator SpawnAgents(int numAgentsToSpawn) {
-
+        string agentName = agentPrefabs[dinoIndex].name;
+        Debug.Log("Spawning " + numAgentsToSpawn + " of agent: " + agentName);
         for (int x = 0; x < numAgentsToSpawn; x++) {
             //SpawnAgent(x % agentPrefabs.Count);
             SpawnAgent(dinoIndex);
             yield return new WaitForEndOfFrame();
         }
+        Debug.Log("Done spawning " + agentName);
         //  StartCoroutine(ResetGravityAfterSeconds(10));
     }
     public IEnumerator SpawnAgents(int dinoIndex, int numAgentsToSpawn, Action<int> flag) {
-
+        string agentName = agentPrefabs[dinoIndex].name;
+        Debug.Log("Spawning " + numAgentsToSpawn + " of agent: " + agentName);
         for (int x = 0; x < numAgentsToSpawn; x++) {
             //SpawnAgent(x % agentPrefabs.Count);
             SpawnAgent(dinoIndex);
             yield return new WaitForEndOfFrame();
         }
         flag(dinoIndex);
+        Debug.Log("Done spawning " + agentName);
         //  StartCoroutine(ResetGravityAfterSeconds(10));
     }
     //Spawns a single agent of type agentNum from the prefab list
@@ -207,8 +226,8 @@ public class GameController : MonoBehaviour {
     //}
     //returns the chunk that the given vector position is located in
     public Chunk GetChunk(Vector3 pos) {
-        int x = ((int)pos.x - startingPoint) / multi;
-        int z = ((int)pos.z - startingPoint) / multi;
+        int x = ((int)pos.x - startingPoint) / chunkDimension;
+        int z = ((int)pos.z - startingPoint) / chunkDimension;
 
         if (x < 0 || z < 0 || x > chunks.Length || z > chunks[0].Length) {
             Debug.Log(x + ", " + z);
@@ -218,7 +237,14 @@ public class GameController : MonoBehaviour {
         return chunks[x][z];
     }
     public void Drop() {
-
+        player.InitPlayer();
+    }
+    private bool AllSpawned() {
+        foreach (bool b in finishedSpawning) {
+            if (!b)
+                return false;
+        }
+        return true;
     }
 
 }
