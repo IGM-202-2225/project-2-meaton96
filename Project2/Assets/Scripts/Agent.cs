@@ -163,24 +163,17 @@ public class Agent : PhysicsObject {
         //call physics object update
         base.Update();
         if (alive) {
-
-            try {
-                Chunk temp = gameController.GetChunk(transform.position);
-                if (chunk != temp) {
-                    UpdateChunk(temp);
-                }
-            } catch (IndexOutOfRangeException) {
-                Debug.Log(transform.position);
+            Chunk temp = gameController.GetChunk(transform.position);
+            if (chunk != temp) {
+                UpdateChunk(temp);
             }
-            
 
             UpdateSphereCollider();
             CheckCollisionWithOtherAgents();
             if (isActive) {
 
                 if (velocity.magnitude > 0.10f) {
-                    if (direction != Vector3.zero)
-                        transform.rotation = Quaternion.LookRotation(direction);
+                    transform.rotation = Quaternion.LookRotation(direction);
                 }
 
 
@@ -355,7 +348,7 @@ public class Agent : PhysicsObject {
                 foreach (SimpleSphereCollider otherAgentCollider in agent.colliders[1]) {
                     if (CheckCollisionByLevel(1, otherAgentCollider)) {
                         if (agent.CompareTag(tag)) {
-                            agent.ApplyForce(velocity * mass * movingPower);
+                            agent.ApplyForce(velocity * mass);
                         }
                         else {
                             if (IsATargetTag(agent)) {
