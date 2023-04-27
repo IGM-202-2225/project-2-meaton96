@@ -32,6 +32,11 @@ public class Player : PhysicsObject {
     public float sensitivity = 1.5f;
     // Start is called before the first frame update
     void Start() {
+        gravityEnabled = false;
+
+        //gravityAmount = 30f;
+    }
+    public void InitPlayer() {
         frictionEnabled = true;
         frictionAmount = movingPower * frictionPercent;
         gravityEnabled = true;
@@ -40,68 +45,70 @@ public class Player : PhysicsObject {
         jumpingPower = 35000f;
         Cursor.lockState = CursorLockMode.Locked;
         freeCam = false;
-        
-        //gravityAmount = 30f;
     }
     public override void Update() {
+        if (gameController.mainMenu) {
 
-        if (!freeCam) {
-            HandleInput();
-            
-            isSprinting = !Input.GetKey(KeyCode.LeftShift);
+        }
+        else {
+            if (!freeCam) {
+                HandleInput();
 
-            if (isSprinting) {
-                if (velocity.magnitude > maxSpeedSprint) {
-                    velocity = velocity.normalized * maxSpeedSprint;
+                isSprinting = !Input.GetKey(KeyCode.LeftShift);
+
+                if (isSprinting) {
+                    if (velocity.magnitude > maxSpeedSprint) {
+                        velocity = velocity.normalized * maxSpeedSprint;
+                    }
                 }
+                else {
+                    if (velocity.magnitude > maxSpeed) {
+                        velocity = velocity.normalized * maxSpeed;
+                    }
+                }
+
+                if (headBob) {
+                    if (velocity.magnitude > 0f) {
+                        //headbob
+                    }
+                }
+                base.Update();
+
+
+
             }
             else {
-                if (velocity.magnitude > maxSpeed) {
-                    velocity = velocity.normalized * maxSpeed;
+                CameraKeyboardMovement();
+            }
+
+            if (Input.GetKeyDown(KeyCode.Tab)) {
+                velocity = Vector3.zero;
+                hudImage.SetActive(freeCam);
+                crossHair.SetActive(freeCam);
+                freeCam = !freeCam;
+
+                if (freeCam) {
+                    playerLocation = transform.position;
+                    playerRotation = transform.rotation;
+                }
+                else {
+                    transform.position = playerLocation;
+                    transform.rotation = playerRotation;
                 }
             }
 
-            if (headBob) {
-                if (velocity.magnitude > 0f) {
-                    //headbob
-                }
-            }
-            base.Update();
-            
-           
+            mousePos.x += Input.GetAxis("Mouse X") * sensitivity;
+            mousePos.y += Input.GetAxis("Mouse Y") * sensitivity;
 
-        } else {
-            CameraKeyboardMovement();
+            transform.localRotation = Quaternion.Euler(-mousePos.y, mousePos.x, 0f);
         }
-
-        if (Input.GetKeyDown(KeyCode.Tab)) {
-            velocity = Vector3.zero;    
-            hudImage.SetActive(freeCam);
-            crossHair.SetActive(freeCam);
-            freeCam = !freeCam;
-            
-            if (freeCam) {
-                playerLocation = transform.position;
-                playerRotation = transform.rotation;
-            }
-            else {
-                transform.position = playerLocation;
-                transform.rotation = playerRotation;
-            }
-        }
-
-        mousePos.x += Input.GetAxis("Mouse X") * sensitivity;
-        mousePos.y += Input.GetAxis("Mouse Y") * sensitivity;
-
-        transform.localRotation = Quaternion.Euler(-mousePos.y, mousePos.x, 0f);
-
         //CameraKeyboardMovement();
 
         //ZoomAmount += Input.GetAxis("Mouse ScrollWheel");
         //  ZoomAmount = Mathf.Clamp(ZoomAmount, -MaxToClamp, MaxToClamp);
         //var translate = Mathf.Min(Mathf.Abs(Input.GetAxis("Mouse ScrollWheel")), MaxToClamp - Mathf.Abs(ZoomAmount));
         //  gameObject.transform.Translate(0, 0, translate * ROTSpeed * Mathf.Sign(Input.GetAxis("Mouse ScrollWheel")));
-        
+
     }
     protected void HandleInput() {
         if (Input.GetKey(KeyCode.W)) {
@@ -119,7 +126,7 @@ public class Player : PhysicsObject {
         }
         else {
             //velocity = new Vector3(0f, velocity.y, 0f);
-          //  ApplyFriction(2);
+            //  ApplyFriction(2);
         }
         if (CheckForGround()) {
             if (Input.GetKeyDown(KeyCode.Space)) {
@@ -154,6 +161,6 @@ public class Player : PhysicsObject {
     private void OnDrawGizmos() {
         Gizmos.DrawLine(transform.position, transform.forward);
     }
-    
+
 
 }

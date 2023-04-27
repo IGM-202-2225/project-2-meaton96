@@ -43,6 +43,8 @@ public class Agent : PhysicsObject {
     float sperateMulti = 40f;
     protected Chunk chunk;
 
+    
+
     public bool alive = true;
     public int _id;
     public static int id = 0;

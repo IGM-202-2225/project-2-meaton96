@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameController : MonoBehaviour {
 
@@ -21,10 +23,19 @@ public class GameController : MonoBehaviour {
     private Terrain terrain;                                                                    //reference to the terrain object
     public bool agentsAvoidObj = true;                                                          //whether or not agent obstacle avoidance is enabled
     public float gravityAmount;                                                                 //the current gravity amount
-    public bool mainMenu;
+    public bool mainMenu = true;
+    [SerializeField] private GameObject uiComponents;
+
+    private readonly int[] NUM_DINOS_TO_SPAWN = { 100, 100, 100, 100 };
+    private bool[] finishedSpawning = { false, false, false, false };
+    [SerializeField] private Player player;
+    [SerializeField] private IntroBehaviour introBehaviour;
+    [SerializeField] private Camera gameCamera, introCamera;
+    
 
     // Start is called before the first frame update
     void Start() {
+        
         chunks = new Chunk[(int)Mathf.Sqrt(numChunks)][];
         //tell the MyJsonUtility static class to parse all of the json data from the file
         MyJsonUtility.SetJsonText(agentDataJson.text);
@@ -55,6 +66,9 @@ public class GameController : MonoBehaviour {
                 GetChunk(tree.transform.position).AddTree(tree.GetComponent<TreeObject>());
             }
         }
+        for (int x = 0; x < NUM_DINOS_TO_SPAWN.Length; x++) {
+            StartCoroutine(SpawnAgents(x, NUM_DINOS_TO_SPAWN[x], FlagDoneSpawning));
+        }
 
         // agents = new();
     }
@@ -64,7 +78,7 @@ public class GameController : MonoBehaviour {
     void Update() {
 
         if (mainMenu) {
-
+            
         }
         else {
             //toggle on or off movement logic for all agents
@@ -123,6 +137,7 @@ public class GameController : MonoBehaviour {
             }
         }
     }
+    
     private IEnumerator SpawnAgentsAtCamera(int numAgentsToSpawn) {
 
         for (int x = 0; x < numAgentsToSpawn; x++) {
@@ -218,7 +233,23 @@ public class GameController : MonoBehaviour {
         return chunks[x][z];
     }
     public void Drop() {
-
+        player.InitPlayer();
+        introCamera.enabled = false;
+        gameCamera.enabled = true;
+        uiComponents.SetActive(true);
+        mainMenu = false;
     }
+    private void FlagDoneSpawning(int dinoNum) {
+        finishedSpawning[dinoNum] = true;
+    }
+    private bool AllSpawned() {
+        foreach (bool b in finishedSpawning) {
+            if (!b)
+                return false;
+        }
+        return true;
+    }
+
+
 
 }

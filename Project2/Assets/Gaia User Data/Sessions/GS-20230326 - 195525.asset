@@ -73,6 +73,17 @@ MonoBehaviour:
     sessionPlaybackState: 1
     m_terrainsFoldedOut: 0
     m_serializedExternalAction: 
+  - m_description: Spawning - Synty Detail Spawner(Clone)
+    m_operationType: 7
+    m_isActive: 1
+    m_affectedTerrainNames:
+    - Terrain_0_0-20230326 - 200324
+    m_operationDateTime: 4/27/2023 2:36:29 AM
+    scriptableObjectAssetGUID: ae6798e4bc9682d4695a504968b713ec
+    m_isFoldedOut: 0
+    sessionPlaybackState: 1
+    m_terrainsFoldedOut: 0
+    m_serializedExternalAction: 
   m_terrainMinMaxCache:
   - guid: 980a49891d52620489d9f827cd027523
     isWorldmap: 0
@@ -85,22 +96,25 @@ MonoBehaviour:
     min: 0
     max: 0
   m_bakedMaskCacheEntries:
-  - fileName: Terrain_0_0-20230326 - 200324_LayerGameObject_3584_5
+  - fileName: Terrain_0_0-20230326 - 200324_LayerGameObject_3584_0.5
     assetPath: Assets/Procedural Worlds/Gaia/TerrainCollisionData/Terrain_0_0-20230326
-      - 200324/Terrain_0_0-20230326 - 200324_LayerGameObject_3584_5
-    fullPath: C:/Users/Mike/Documents/GitHub/Project2/Assets/Procedural Worlds/Gaia/TerrainCollisionData/Terrain_0_0-20230326
-      - 200324/Terrain_0_0-20230326 - 200324_LayerGameObject_3584_5
+      - 200324/Terrain_0_0-20230326 - 200324_LayerGameObject_3584_0.5
+    fullPath: C:/Users/meato/Documents/GitHub/project-2-meaton96/Project2/Assets/Procedural
+      Worlds/Gaia/TerrainCollisionData/Terrain_0_0-20230326 - 200324/Terrain_0_0-20230326
+      - 200324_LayerGameObject_3584_0.5
     texture: {fileID: 0}
   - fileName: Terrain_0_0-20230326 - 200324_RadiusTag_Synty Small Farm_50
     assetPath: Assets/Procedural Worlds/Gaia/TerrainCollisionData/Terrain_0_0-20230326
       - 200324/Terrain_0_0-20230326 - 200324_RadiusTag_Synty Small Farm_50
-    fullPath: C:/Users/Mike/Documents/GitHub/Project2/Assets/Procedural Worlds/Gaia/TerrainCollisionData/Terrain_0_0-20230326
-      - 200324/Terrain_0_0-20230326 - 200324_RadiusTag_Synty Small Farm_50
+    fullPath: C:/Users/meato/Documents/GitHub/project-2-meaton96/Project2/Assets/Procedural
+      Worlds/Gaia/TerrainCollisionData/Terrain_0_0-20230326 - 200324/Terrain_0_0-20230326
+      - 200324_RadiusTag_Synty Small Farm_50
     texture: {fileID: 0}
   - fileName: Terrain_0_0-20230326 - 200324_RadiusTag_Synty Medium Farm_100
     assetPath: Assets/Procedural Worlds/Gaia/TerrainCollisionData/Terrain_0_0-20230326
       - 200324/Terrain_0_0-20230326 - 200324_RadiusTag_Synty Medium Farm_100
-    fullPath: C:/Users/Mike/Documents/GitHub/Project2/Assets/Procedural Worlds/Gaia/TerrainCollisionData/Terrain_0_0-20230326
-      - 200324/Terrain_0_0-20230326 - 200324_RadiusTag_Synty Medium Farm_100
+    fullPath: C:/Users/meato/Documents/GitHub/project-2-meaton96/Project2/Assets/Procedural
+      Worlds/Gaia/TerrainCollisionData/Terrain_0_0-20230326 - 200324/Terrain_0_0-20230326
+      - 200324_RadiusTag_Synty Medium Farm_100
     texture: {fileID: 0}
   m_worldBiomeMaskSettings: {fileID: 0}
