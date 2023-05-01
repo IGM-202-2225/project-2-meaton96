@@ -4,7 +4,7 @@ using TMPro;
 using UnityEngine;
 
 public class IntroBehaviour : MonoBehaviour {
-    [SerializeField] private float speed = 50f;
+    [SerializeField] private float speed = 75f;
     [SerializeField] private GameController gameController;
     [SerializeField] private GameObject startButton;
     [SerializeField] private TextMeshProUGUI introText;
@@ -40,7 +40,7 @@ public class IntroBehaviour : MonoBehaviour {
                 isShowingText = true;
                 StartCoroutine(ShowNextText()); 
             }
-            Debug.Log(transform.position.x);
+            
         }
         if (transform.position.x > 0 ) {
             gameController.Drop();
@@ -50,7 +50,8 @@ public class IntroBehaviour : MonoBehaviour {
             
         }
         else if (transform.position.x > 5000) {
-            gameObject.SetActive(false);
+            Destroy(gameObject);
+
         }
     }
 

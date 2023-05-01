@@ -82,9 +82,12 @@ public class Player : PhysicsObject {
             }
 
             if (Input.GetKeyDown(KeyCode.Tab)) {
+                Debug.Log("tab called");
                 velocity = Vector3.zero;
                 hudImage.SetActive(freeCam);
                 crossHair.SetActive(freeCam);
+                gravityEnabled = freeCam;
+                
                 freeCam = !freeCam;
 
                 if (freeCam) {
@@ -92,8 +95,7 @@ public class Player : PhysicsObject {
                     playerRotation = transform.rotation;
                 }
                 else {
-                    transform.position = playerLocation;
-                    transform.rotation = playerRotation;
+                    transform.SetPositionAndRotation(playerLocation, playerRotation);
                 }
             }
 

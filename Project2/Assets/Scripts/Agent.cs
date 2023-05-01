@@ -164,8 +164,14 @@ public class Agent : PhysicsObject {
         totalForces = Vector3.zero;
         //call physics object update
         base.Update();
+        Chunk temp = null;
         if (alive) {
-            Chunk temp = gameController.GetChunk(transform.position);
+            try {
+                temp = gameController.GetChunk(transform.position);
+
+            } catch (IndexOutOfRangeException) {
+                Debug.Log(gameObject.name + " " + transform.position.ToString());
+            }
             if (chunk != temp) {
                 UpdateChunk(temp);
             }

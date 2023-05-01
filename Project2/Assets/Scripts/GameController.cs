@@ -26,8 +26,8 @@ public class GameController : MonoBehaviour {
     public bool mainMenu = true;
     [SerializeField] private GameObject uiComponents;
 
-    private readonly int[] NUM_DINOS_TO_SPAWN = { 100, 100, 100, 100 };
-    private bool[] finishedSpawning = { false, false, false, false };
+    private readonly int[] NUM_DINOS_TO_SPAWN = { 100, 100, 100, 16 };
+    //private bool[] finishedSpawning = { false, false, false, false };
     [SerializeField] private Player player;
     [SerializeField] private IntroBehaviour introBehaviour;
     [SerializeField] private Camera gameCamera, introCamera;
@@ -67,7 +67,7 @@ public class GameController : MonoBehaviour {
             }
         }
         for (int x = 0; x < NUM_DINOS_TO_SPAWN.Length; x++) {
-            StartCoroutine(SpawnAgents(x, NUM_DINOS_TO_SPAWN[x], FlagDoneSpawning));
+            StartCoroutine(SpawnAgents(x, NUM_DINOS_TO_SPAWN[x]));
         }
 
         // agents = new();
@@ -94,7 +94,7 @@ public class GameController : MonoBehaviour {
             //start spawn agent coroutine to spawn a bunch of agents
             //also increase the gravity by 5 times to have the agents drop quickly
             if (Input.GetKeyDown(KeyCode.F2)) {
-                StartCoroutine(SpawnAgents(150));
+                StartCoroutine(SpawnAgents(dinoIndex, 150));
                 //   gravityAmount *= 5f;
 
                 // UpdateChunks();
@@ -153,36 +153,20 @@ public class GameController : MonoBehaviour {
         //  StartCoroutine(ResetGravityAfterSeconds(10));
     }
     //drop gravity back to default after seconds
-    private IEnumerator ResetGravityAfterSeconds(int seconds) {
-        for (int x = 0; x < seconds; x++) {
-            yield return new WaitForSeconds(1);
-        }
-        gravityAmount = DEFAULT_GRAVITY;
-    }
-    //Spawn 150 agents of the currently selected type
-    public IEnumerator SpawnAgents(int numAgentsToSpawn) {
+    
+    public IEnumerator SpawnAgents(int dinoIndex, int numAgentsToSpawn) {
 
         for (int x = 0; x < numAgentsToSpawn; x++) {
-            //SpawnAgent(x % agentPrefabs.Count);
             SpawnAgent(dinoIndex);
             yield return new WaitForEndOfFrame();
         }
-        //  StartCoroutine(ResetGravityAfterSeconds(10));
-    }
-    public IEnumerator SpawnAgents(int dinoIndex, int numAgentsToSpawn, Action<int> flag) {
-
-        for (int x = 0; x < numAgentsToSpawn; x++) {
-            //SpawnAgent(x % agentPrefabs.Count);
-            SpawnAgent(dinoIndex);
-            yield return new WaitForEndOfFrame();
-        }
-        flag(dinoIndex);
-        //  StartCoroutine(ResetGravityAfterSeconds(10));
+        
     }
     //Spawns a single agent of type agentNum from the prefab list
     //at a random location within the circle defined by radius
     private void SpawnAgent(int agentNum) {
 
+            
         float radius = 700;
 
         float xLoc = UnityEngine.Random.Range(-radius, radius);
@@ -193,6 +177,24 @@ public class GameController : MonoBehaviour {
         if (agentNum == 2) {
             minY += 35;
             maxY += 90;
+        }
+        if (agentNum == 3) {
+            Vector2[] locations = {
+                new Vector2(xLoc + 10, zLoc),
+                new Vector2(xLoc - 10, zLoc),
+                new Vector2(xLoc, zLoc + 10),
+                new Vector2(xLoc, zLoc - 10),
+                new Vector2(xLoc + 10, zLoc + 10),
+                new Vector2(xLoc - 10, zLoc - 10),
+
+            };
+
+            foreach (Vector2 vec in locations) {
+                float height = terrain.SampleHeight(new Vector3(vec.x, 0f, vec.y));
+                GameObject agentInstance = Instantiate(agentPrefabs[agentNum], new Vector3(vec.x, height, vec.y), Quaternion.identity);
+                agentInstance.GetComponent<Agent>().UpdateChunk(GetChunk(agentInstance.transform.position));
+            }
+            return;
         }
 
         float yLoc = terrain.SampleHeight(new Vector3(xLoc, 0f, zLoc)) + UnityEngine.Random.Range(minY, maxY);
@@ -239,16 +241,7 @@ public class GameController : MonoBehaviour {
         uiComponents.SetActive(true);
         mainMenu = false;
     }
-    private void FlagDoneSpawning(int dinoNum) {
-        finishedSpawning[dinoNum] = true;
-    }
-    private bool AllSpawned() {
-        foreach (bool b in finishedSpawning) {
-            if (!b)
-                return false;
-        }
-        return true;
-    }
+    
 
 
 
