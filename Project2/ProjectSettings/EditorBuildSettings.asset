@@ -8,7 +8,10 @@ EditorBuildSettings:
   - enabled: 0
     path: 
     guid: 00000000000000000000000000000000
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Terrain.unity
     guid: c60b87debfc1e81418e94d79a4a672b5
+  - enabled: 1
+    path: Assets/Scenes/Terrain 1.unity
+    guid: 5947a2f9b1646a04cbfa3d5a6f66a02f
   m_configObjects: {}
