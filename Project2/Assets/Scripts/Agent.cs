@@ -44,6 +44,8 @@ public class Agent : PhysicsObject {
     protected Chunk chunk;
 
     
+    protected float fleeTime = 10f;
+    protected float fleeTimer = 0f;
 
     public bool alive = true;
     public int _id;
@@ -192,7 +194,6 @@ public class Agent : PhysicsObject {
                         break;
                     case State.wandering:
                         totalForces += Wander();
-                        totalForces += Seperate();
                         totalForces += Flock();
                         break;
                     case State.fleeing:
@@ -205,6 +206,9 @@ public class Agent : PhysicsObject {
                 totalForces += StayInBounds();
                 if (avoidingObstacles)
                     totalForces += AvoidTrees();
+
+                totalForces += Seperate();
+                
 
                 ApplyForce(movingPower * totalForces);
 
@@ -223,9 +227,16 @@ public class Agent : PhysicsObject {
         }
 
     }
+    
     public void FleeTarget(Transform transform) {
+        if (state == State.pursuing) return;
         target = transform;
+        fleeTimer = 0;
         state = State.fleeing;
+    }
+    public void PursueTarget(Transform transform) {
+        target = transform;
+        state = State.pursuing;
     }
     public void ToggleAI() {
         isActive = !isActive;
@@ -238,6 +249,13 @@ public class Agent : PhysicsObject {
         if (target == null) {
             state = State.wandering;
             return Vector3.zero;
+        }
+        if (fleeTimer >= fleeTime) {
+            state = State.wandering;
+            return Vector3.zero;
+        }
+        else {
+            fleeTimer += Time.deltaTime;
         }
 
         Vector3 desiredVelocity;
@@ -294,19 +312,7 @@ public class Agent : PhysicsObject {
         }
         return false;
     }
-    //updates the avoid agents list with all types of agents the agent is supposed to be avoiding
-    //protected virtual void UpdateAgentLists() {
-    //    avoidAgents = new();
-    //    foreach (Agent agent in gameController.agents) {
-    //        if (agent.Equals(this)) continue;
-
-    //        if (agent.CompareTag(tag)) {
-    //            avoidAgents.Add(agent);
-    //        }
-
-    //    }
-
-    //}
+    
     //do nothing, 50/50 chance every stateSwitchTimer to swap between idle and wander
     public void Idle() {
 
@@ -414,11 +420,11 @@ public class Agent : PhysicsObject {
         return false;
     }
     protected List<Agent> FilterAgentsByRangeAndTag(float range, List<string> tags) {
-        var targetAgents = chunk.GetAgentsOfType(tags);
+        var targetAgents = chunk.FilterAgentsByTagAndDistance(transform.position, range, tags);
 
         targetAgents.Remove(this);
-        
-        return targetAgents.Where(agent => Vector3.Distance(transform.position, agent.transform.position) < range).Cast<Agent>().ToList();
+
+        return targetAgents.Cast<Agent>().ToList();
     }
 
 

@@ -26,11 +26,13 @@ public class GameController : MonoBehaviour {
     public bool mainMenu = true;
     [SerializeField] private GameObject uiComponents;
 
-    private readonly int[] NUM_DINOS_TO_SPAWN = { 100, 100, 100, 16 };
+    private readonly int[] NUM_DINOS_TO_SPAWN = { 100, 100, 50, 16 };
     //private bool[] finishedSpawning = { false, false, false, false };
     [SerializeField] private Player player;
     [SerializeField] private IntroBehaviour introBehaviour;
     [SerializeField] private Camera gameCamera, introCamera;
+
+    private float pursueTimer, pursueTime = 10f;
     
 
     // Start is called before the first frame update
@@ -81,6 +83,15 @@ public class GameController : MonoBehaviour {
             
         }
         else {
+
+            if (pursueTimer >= pursueTime) {
+                pursueTime = 0f;
+                StartAgentHuntingForPlayer();
+            }
+            else {
+                pursueTimer += Time.deltaTime;
+            }
+
             //toggle on or off movement logic for all agents
             if (Input.GetKeyDown(KeyCode.F1)) {
                 foreach (var chunkRow in chunks) {
@@ -175,8 +186,8 @@ public class GameController : MonoBehaviour {
         float minY = 2, maxY = 5;
 
         if (agentNum == 2) {
-            minY += 35;
-            maxY += 90;
+            minY += 70;
+            maxY += 120;
         }
         if (agentNum == 3) {
             Vector2[] locations = {
@@ -191,7 +202,13 @@ public class GameController : MonoBehaviour {
 
             foreach (Vector2 vec in locations) {
                 float height = terrain.SampleHeight(new Vector3(vec.x, 0f, vec.y));
-                GameObject agentInstance = Instantiate(agentPrefabs[agentNum], new Vector3(vec.x, height, vec.y), Quaternion.identity);
+                GameObject agentInstance = Instantiate(agentPrefabs[agentNum],
+                    new Vector3(
+                        vec.x, 
+                        height + UnityEngine.Random.Range(height + minY, height + maxY), 
+                        vec.y), 
+                    Quaternion.identity);
+
                 agentInstance.GetComponent<Agent>().UpdateChunk(GetChunk(agentInstance.transform.position));
             }
             return;
@@ -206,22 +223,7 @@ public class GameController : MonoBehaviour {
         GameObject agent = Instantiate(agentPrefabs[agentNum], new Vector3(location.x, yLoc, location.z), Quaternion.identity);
         agent.GetComponent<Agent>().UpdateChunk(GetChunk(agent.transform.position));
     }
-    //calls every chunk's update method every updateTime seconds
-    //public void UpdateChunks() {
-    //    if (updateTime >= updateTimer) {
-    //        updateTimer = 0;
-    //        for (int x = 0; x < chunks.Length; x++) {
-    //            for (int y = 0; y < chunks[0].Length; y++) {
-    //                //Debug.Log(chunks[x][y]);
-    //                chunks[x][y].Update();
-    //            }
-    //        }
-
-    //    }
-    //    else {
-    //        updateTime += Time.deltaTime;
-    //    }
-    //}
+    
     //returns the chunk that the given vector position is located in
     public Chunk GetChunk(Vector3 pos) {
         int x = ((int)pos.x - startingPoint) / multi;
@@ -233,6 +235,19 @@ public class GameController : MonoBehaviour {
 
         }
         return chunks[x][z];
+    }
+    public void StartAgentHuntingForPlayer() {
+        List<Agent> allAgents = new();
+        for (int x = 0; x < chunks.Length; x++) {
+            for (int y = 0; y < chunks[x].Length; y++) {
+                allAgents.AddRange(chunks[x][y].GetAgentsOfType(new List<string>() {
+                    "Carnivore",
+                    "SmallCarnivore"
+                }));
+            }
+        }
+        allAgents[UnityEngine.Random.Range(0, allAgents.Count)].PursueTarget(player.transform);
+
     }
     public void Drop() {
         player.InitPlayer();

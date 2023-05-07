@@ -15,6 +15,7 @@ public class Player : PhysicsObject {
     private bool freeCam;
     private Vector3 playerLocation;
     private Quaternion playerRotation;
+    private float shootSoundRadius = 50f;
 
     [SerializeField] private GameObject hudImage, crossHair;
 
@@ -26,7 +27,7 @@ public class Player : PhysicsObject {
     bool isSprinting;
     [SerializeField] protected GameObject playerCharacter;
 
-
+    protected float playerHeight = 5f;
 
     Vector2 mousePos;
     public float sensitivity = 1.5f;
@@ -112,6 +113,22 @@ public class Player : PhysicsObject {
         //  gameObject.transform.Translate(0, 0, translate * ROTSpeed * Mathf.Sign(Input.GetAxis("Mouse ScrollWheel")));
 
     }
+    public override bool CheckForGround() {
+        float total = 0;
+        total += terrain.SampleHeight(new Vector3(transform.position.x - 1, 0f, transform.position.z));
+        total += terrain.SampleHeight(new Vector3(transform.position.x + 1, 0f, transform.position.z));
+        total += terrain.SampleHeight(new Vector3(transform.position.x, 0f, transform.position.z + 1));
+        total += terrain.SampleHeight(new Vector3(transform.position.x, 0f, transform.position.z - 1));
+        total /= 4.0f;
+        if (transform.position.y <= total + playerHeight + 2) {
+            Vector3 pos = transform.position;
+            pos.y = total + playerHeight;
+            transform.position = pos;
+            return true;
+        }
+        return false;
+    }
+    protected override void HandleGroundCollision() { }
     protected void HandleInput() {
         if (Input.GetKey(KeyCode.W)) {
             ApplyForce(movingPower * transform.forward);
@@ -136,10 +153,20 @@ public class Player : PhysicsObject {
             }
         }
         if (Input.GetMouseButtonDown(0)) {
-            Bullet bullet = Instantiate(bulletPrefab, Camera.main.transform.position, Quaternion.identity).GetComponent<Bullet>();
-            bullet.Fire(Camera.main.transform.forward, gameController);
+            FireBullet();
+            
         }
 
+
+    }
+    private void FireBullet() {
+        Bullet bullet = Instantiate(bulletPrefab, Camera.main.transform.position, Quaternion.identity).GetComponent<Bullet>();
+        bullet.Fire(Camera.main.transform.forward, gameController);
+
+        gameController.
+            GetChunk(transform.position).
+            GetAgentsInsideCircle(transform.position, shootSoundRadius).
+            ForEach(agent => agent.FleeTarget(transform));
 
     }
 

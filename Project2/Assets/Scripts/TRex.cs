@@ -41,7 +41,7 @@ public class TRex : Agent {
             state = State.wandering;
             return Vector3.zero;
         }
-
+        Debug.Log(target.tag);
         float distance = Vector3.Distance(transform.position, target.position);
         Vector3 pursuePos = target.position + target.gameObject.GetComponent<PhysicsObject>().velocity *
 

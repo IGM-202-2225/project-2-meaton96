@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
+using static UnityEditor.PlayerSettings;
 
 public class Chunk {
     public const float WIDTH = 256f;
@@ -63,6 +65,12 @@ public class Chunk {
         
         return allAgents;
 
+    }
+    public List<PhysicsObject> FilterAgentsByTagAndDistance(Vector3 pos, float radius, IEnumerable<string> tags) {
+        return GetAgentsOfType(tags).Where(agent => Vector3.Distance(pos, agent.transform.position) < radius).ToList();
+    }
+    public List<Agent> GetAgentsInsideCircle(Vector3 center, float radius) {
+        return agents.Where(agent => Vector3.Distance(center, agent.transform.position) < radius).ToList();
     }
     public List<Chunk> GetAdjacentChunks() {
         List<Chunk> adjacentChunks = new();

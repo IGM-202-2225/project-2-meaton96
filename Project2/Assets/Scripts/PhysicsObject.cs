@@ -34,11 +34,7 @@ public class PhysicsObject : MonoBehaviour {
             ApplyFriction();
 
         if (CheckForGround()) {
-
-            velocity.y = 0;
-            Vector3 pos = transform.position;
-            pos.y = terrain.SampleHeight(new Vector3(transform.position.x, 0f, transform.position.z));
-            transform.position = pos;
+            HandleGroundCollision();
         }
         if (gravityEnabled) {
             ApplyGravity();
@@ -56,6 +52,12 @@ public class PhysicsObject : MonoBehaviour {
     }
     public virtual bool CheckForGround() {
         return terrain.SampleHeight(new Vector3(transform.position.x, 0f, transform.position.z)) >= transform.position.y;
+    }
+    protected virtual void HandleGroundCollision() {
+        velocity.y = 0;
+        Vector3 pos = transform.position;
+        pos.y = terrain.SampleHeight(new Vector3(transform.position.x, 0f, transform.position.z));
+        transform.position = pos;
     }
     public void ToggleCollision() {
         collisionEnabled = !collisionEnabled;
