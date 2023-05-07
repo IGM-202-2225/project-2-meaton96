@@ -51,11 +51,12 @@ A carniverous agent that will wander around and hunt smaller creatures
 
 -  Steers towards a target agent by predicting its movement by up to 2 seconds. The time is reduced as it gets closer.
 -  Obstacles - avoids all tree obstacles
--  Seperation - Not implemented in this state. Agent will ignore everything except pursuing its target.
+-  Seperation - Agents of the same type
    
 #### State Transistions
 
-- Getting close enough to a target agent type, possibly will add a game timer or randomness to have this agent hunt the player
+-  Getting close enough to a target agent type
+-  Every 10 seconds a random dinosaur will begin to pursue the player
 
 ## SmallDino
 
@@ -73,7 +74,7 @@ A small herbivore dino, faster and more nimble than the TRex
    
 #### State Transistions
 
-- currently the only state for this agent
+- Default state
    
 ### Flee
 
@@ -87,13 +88,13 @@ A small herbivore dino, faster and more nimble than the TRex
    
 #### State Transistions
 
-- NYI
+- All dinosaurs will flee the player for 10 seconds if they are near enough when the player shoots their gun (unless this agent is currently in pursuit of the player)
 
 ## Flyer
 A large slow flying dinosaur
 
 ### Wander
-Default and only current state (v0.0.3). The agent wanders around the sky randomly
+Default and only current state. The agent wanders around the sky randomly
 
 #### Steering Behaviours
 
@@ -103,6 +104,64 @@ Default and only current state (v0.0.3). The agent wanders around the sky random
 
 #### State Transitions
 - None
+
+## Velociraptor
+A small carniverous dinosaur that travels around in a pack
+
+### Wander
+
+**Objective:** Agent wanders around randomly
+
+#### Steering Behaviors
+
+*  Wander movement using the circle method with small wander angle changes
+   *  tracks nearby agents to start pursuing
+*  Obstacles - Avoids all tree obstacles
+*  Seperation - Will seperate from any agent with the same tag
+   
+#### State Transistions
+
+-  default state, will be transitioned to after exiting another state
+   -  Will transition back to this state if the pursuit/seek/flee target becomes null
+   
+### Pursue
+
+**Objective:** moves towards a target agent
+
+#### Steering Behaviors
+
+-  Steers towards a target agent by predicting its movement by up to 2 seconds. The time is reduced as it gets closer.
+-  Obstacles - avoids all tree obstacles
+-  Seperation - Agents of the same type
+   
+#### State Transistions
+
+-  Getting close enough to a target agent type
+-  Every 10 seconds a random dinosaur will begin to pursue the player
+
+### Flee
+
+**Objective:** Run away from a target agent
+
+#### Steering Behaviors
+
+- uses fleeing logic to move away from a target transform
+- Obstacles - Avoids all tree obstacles
+- Seperation - Any agent of the same type
+
+### Flock
+
+**Objective:** Move around in a pack of similar agents
+
+#### Steering Behaviors
+-  uses flocking logic to move with a group of agents
+-  flocks with any units inside a specified radius
+-  sperates with the agents its flocking with to prevent collision
+-  avoids all tree obstacles
+
+#### State Transitions
+-  None, this agent will always perform flocking behaviour.
+	-  this means if one unit decides to perform a pursuit action (i.e. is randomly chosen to pursue player) then all agents in its flock will move with it in its pursuit
 
 ## Sources
 
@@ -123,6 +182,12 @@ Default and only current state (v0.0.3). The agent wanders around the sky random
 ## Known Issues
 
 -  Tree Hitboxes are bugged and have been disabled
+-  freecam toggle is not currently working
+-  There is currently no collision resolution between players and dinosaurs
+-  Feedback that the gun was fired is basically 0
+-  Shooting close range dinosaurs has odd behaviour
+-  Controls text displayed on screen is not updated
+-  Flee trigger when shooting gun is not working
 
 ## Documentation
 
@@ -141,8 +206,16 @@ Pursuit can be viewed in the Trex class [View TRex.cs on Github](Project2/Assets
 	-  Updated all movement logic to return steering vectors instead of apply their own forces. All forces are summed and finally multiplied by a movingPower scalar. This should be more efficient.
 	-  Seperation now applies a force on itself away from all other agents instead of applying a force to other agents--
 - 0.0.4
-	-  Fixed Seperation bug that was causing it to not function properly	
-
+	-  Fixed Seperation bug that was causing it to not function properly
+- 0.1
+	-  Fixed issue causing camera shake with player when on the ground
+	-  Fixed issue causing dinosaurs to fly into the air during pursuit
+	-  Fixed bounds issue causing flying dinosaurs to move outside of the chunk system resulting in NullPointer
+	-  Added dinosaur pursuit of player
+		-  every 10 seconds a random carnivourous dinosaur will decide to pursue the player
+	-  Added Velociraptor (See above section)
+	
+	
 ### Requirements not completed
 
 _If you did not complete a project requirement, notate that here_

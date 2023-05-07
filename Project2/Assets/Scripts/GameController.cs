@@ -255,6 +255,7 @@ public class GameController : MonoBehaviour {
         gameCamera.enabled = true;
         uiComponents.SetActive(true);
         mainMenu = false;
+        Time.timeScale = 1f;
     }
     
 

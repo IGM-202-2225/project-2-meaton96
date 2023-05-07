@@ -182,7 +182,7 @@ public class Agent : PhysicsObject {
             CheckCollisionWithOtherAgents();
             if (isActive) {
 
-                if (velocity.magnitude > 0.10f) {
+                if (direction != Vector3.zero) {
                     transform.rotation = Quaternion.LookRotation(direction);
                 }
 
@@ -356,6 +356,9 @@ public class Agent : PhysicsObject {
     //sets up agent turning to direction rotation
 
     protected void CheckCollisionWithOtherAgents() {
+        if (chunk == null || chunk.agents == null)
+            return;
+
         foreach (Agent agent in chunk.agents) {
             if (agent == this) continue;
             if (agent.CheckCollisionByLevel(0, colliders[0][0])) {

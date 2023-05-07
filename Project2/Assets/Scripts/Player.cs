@@ -17,17 +17,19 @@ public class Player : PhysicsObject {
     private Quaternion playerRotation;
     private float shootSoundRadius = 50f;
 
+    private bool paused = false;
+
     [SerializeField] private GameObject hudImage, crossHair;
 
-    [SerializeField] protected float jumpingPower;
-    [SerializeField] protected float frictionPercent;
+    protected float jumpingPower;
+    protected float frictionPercent = .5f;
     bool headBob = true;
     protected float maxSpeed = 10f;
     protected float maxSpeedSprint = 20f;
     bool isSprinting;
-    [SerializeField] protected GameObject playerCharacter;
+   // [SerializeField] protected GameObject playerCharacter;
 
-    protected float playerHeight = 5f;
+    protected float playerHeight = 3.5f;
 
     Vector2 mousePos;
     public float sensitivity = 1.5f;
@@ -52,7 +54,10 @@ public class Player : PhysicsObject {
 
         }
         else {
-            if (!freeCam) {
+            if (freeCam) {
+                CameraKeyboardMovement();
+            }
+            else {
                 HandleInput();
 
                 isSprinting = !Input.GetKey(KeyCode.LeftShift);
@@ -74,12 +79,8 @@ public class Player : PhysicsObject {
                     }
                 }
                 base.Update();
-
-
-
-            }
-            else {
-                CameraKeyboardMovement();
+                
+                
             }
 
             if (Input.GetKeyDown(KeyCode.Tab)) {
@@ -90,6 +91,7 @@ public class Player : PhysicsObject {
                 gravityEnabled = freeCam;
                 
                 freeCam = !freeCam;
+                Debug.Log(freeCam);
 
                 if (freeCam) {
                     playerLocation = transform.position;
@@ -98,6 +100,10 @@ public class Player : PhysicsObject {
                 else {
                     transform.SetPositionAndRotation(playerLocation, playerRotation);
                 }
+            }
+            if (Input.GetKeyDown(KeyCode.Escape)) {
+                Time.timeScale = paused ? 1f : 0f;
+                paused = !paused;
             }
 
             mousePos.x += Input.GetAxis("Mouse X") * sensitivity;
@@ -115,14 +121,16 @@ public class Player : PhysicsObject {
     }
     public override bool CheckForGround() {
         float total = 0;
-        total += terrain.SampleHeight(new Vector3(transform.position.x - 1, 0f, transform.position.z));
-        total += terrain.SampleHeight(new Vector3(transform.position.x + 1, 0f, transform.position.z));
-        total += terrain.SampleHeight(new Vector3(transform.position.x, 0f, transform.position.z + 1));
-        total += terrain.SampleHeight(new Vector3(transform.position.x, 0f, transform.position.z - 1));
+        total += terrain.SampleHeight(new Vector3(transform.position.x - .5f, 0f, transform.position.z));
+        total += terrain.SampleHeight(new Vector3(transform.position.x + .5f, 0f, transform.position.z));
+        total += terrain.SampleHeight(new Vector3(transform.position.x, 0f, transform.position.z + .5f));
+        total += terrain.SampleHeight(new Vector3(transform.position.x, 0f, transform.position.z - .5f));
         total /= 4.0f;
-        if (transform.position.y <= total + playerHeight + 2) {
+        if (transform.position.y <= total + playerHeight + 3.5) {
             Vector3 pos = transform.position;
             pos.y = total + playerHeight;
+            velocity.y = 0f;
+            //transform.position = Vector3.Lerp(transform.position, pos, Time.deltaTime);
             transform.position = pos;
             return true;
         }

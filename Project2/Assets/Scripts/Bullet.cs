@@ -11,7 +11,7 @@ public class Bullet : PhysicsObject {
 
     protected override void Awake() {
         base.Awake();
-        firePower = 2500;
+        firePower = 1900;
         mass = 2f;
         radius = .45f;
 

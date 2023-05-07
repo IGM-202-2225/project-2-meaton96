@@ -59,6 +59,7 @@ public class Velociraptor : Agent {
 
         Vector3 desiredVelocity = (pursuePos - transform.position).normalized * maxSpeed;
 
+        pursuePos.y = transform.position.y;
 
         return desiredVelocity - velocity;
     }

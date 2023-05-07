@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SocialPlatforms;
-using static UnityEditor.PlayerSettings;
 
 public class Chunk {
     public const float WIDTH = 256f;

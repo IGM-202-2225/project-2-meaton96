@@ -41,11 +41,13 @@ public class TRex : Agent {
             state = State.wandering;
             return Vector3.zero;
         }
-        Debug.Log(target.tag);
+        //Debug.Log(target.tag);
         float distance = Vector3.Distance(transform.position, target.position);
         Vector3 pursuePos = target.position + target.gameObject.GetComponent<PhysicsObject>().velocity *
 
             (pursuePredictTime * (-(4 - distance) / distance));
+
+        pursuePos.y = transform.position.y;
 
         Vector3 desiredVelocity = (pursuePos - transform.position).normalized * maxSpeed;
 
