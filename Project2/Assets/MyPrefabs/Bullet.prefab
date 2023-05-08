@@ -29,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 2575174577542386459}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1.74, z: 0}
-  m_LocalScale: {x: 0.05, y: 0.06, z: 0.05}
+  m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -102,9 +102,6 @@ MonoBehaviour:
   radius: 0.45
   firePower: 0
   trees: []
-  dinoHitExplosion: {fileID: 1411588298947990, guid: 22429e62552901f4d94bca4295a9886a, type: 3}
-  groundHitExplosion: {fileID: 1995831016165032, guid: 11bd8e98407c15747aeae47b8a65f257, type: 3}
-  smokeTrail: {fileID: 1193206252530958, guid: 0fe24a5ceb127f14eb19a30565685075, type: 3}
   ground: {fileID: 0}
   explosionSound: {fileID: 0}
 --- !u!82 &2338562878161324028

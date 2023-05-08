@@ -10,7 +10,7 @@ public class PhysicsObject : MonoBehaviour {
     public float mass;
     protected bool frictionEnabled;
     protected float frictionAmount;
-    protected bool gravityEnabled;
+    public bool gravityEnabled;
     protected readonly float gravityAmount = 10;
     //public float bounceAmount;
     //  public bool collisionEnabled = true;

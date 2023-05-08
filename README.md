@@ -171,15 +171,15 @@ A small carniverous dinosaur that travels around in a pack
 
 -  3D game with terrain generated using unity asset store generator
 	-  all colliders have been removed, only thing used from this is grabbing the height of the terrain from the terrain object and using that as ground
-	-  Physics object child script has been added to all of the trees
--  Extended player interactions
-	-  eventually plan to create a small game where you can go around and hunt dinosaurs with an RPG, and maybe the dinos come to eat you, might play around with adding extra objectives depending on time allowances
+-  Firing rockets at the dinosaurs broke at some point and I did not have time to fix it
+-  Player interaction is limited to spawning dinosaurs and moving around (this will cause pursuing dinosaurs to chase you)
 
 ## Known Issues
 
 -  Tree Hitboxes are bugged and have been disabled
 -  There is currently no collision resolution between players and dinosaurs
--  Shooting has odd behaviour
+-  Shooting does not seem to work
+	-  player can still interact with agents by spawning dinosaurs
 
 ## Documentation
 
@@ -216,9 +216,11 @@ Pursuit can be viewed in the Trex class [View TRex.cs on Github](Project2/Assets
 	-  Fixed gravity
 -  0.4 
 	-  Fixed Controls text
-	-  Fixed bug with flying dino's StayInBounds 
+	-  Fixed bug with flying dino's StayInBounds
+-  0.5
+	- added sphere collider and rigidbody to player (see below) 
 
 ### Requirements not completed
 
-_If you did not complete a project requirement, notate that here_
+Having the player be a physics object worked fine except setting the camera's height the same was as the agents (with getting the height value from the terrain object) was causing a horrible camera shake/jitter. I replaced this logic with Unity's Rigidbody and sphere/terrain collider which works a lot better. I really don't think there was a way around this since there is no other way to get a collision with the terrain object besides what I tried. **I understand this is not allowed but none of the autonomous agents have rigidbodys or colliders which is the focus of the assignment. If this is an issue still please email me @ me3870@rit.edu and I will revert to the previous build. Viewing the agents' movement is really done best with the free camera which is jitter free.
 
