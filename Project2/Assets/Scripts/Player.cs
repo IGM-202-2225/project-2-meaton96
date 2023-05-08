@@ -17,7 +17,7 @@ public class Player : PhysicsObject {
     private Quaternion playerRotation;
     private float shootSoundRadius = 50f;
 
-    //private bool paused = false;
+    private bool paused = false;
 
     [SerializeField] private GameObject hudImage, crossHair;
 
@@ -103,15 +103,16 @@ public class Player : PhysicsObject {
                     transform.SetPositionAndRotation(playerLocation, playerRotation);
                 }
             }
-            //if (Input.GetKeyDown(KeyCode.Escape)) {
-            //    Time.timeScale = paused ? 1f : 0f;
-            //    paused = !paused;
-            //}
+            if (Input.GetKeyDown(KeyCode.Escape)) {
+                
+                paused = !paused;
+            }
+            if (!paused) {
+                mousePos.x += Input.GetAxis("Mouse X") * sensitivity;
+                mousePos.y += Input.GetAxis("Mouse Y") * sensitivity;
 
-            mousePos.x += Input.GetAxis("Mouse X") * sensitivity;
-            mousePos.y += Input.GetAxis("Mouse Y") * sensitivity;
-
-            transform.localRotation = Quaternion.Euler(-mousePos.y, mousePos.x, 0f);
+                transform.localRotation = Quaternion.Euler(-mousePos.y, mousePos.x, 0f);
+            }
         }
         //CameraKeyboardMovement();
 

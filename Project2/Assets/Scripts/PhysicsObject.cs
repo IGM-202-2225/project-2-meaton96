@@ -75,7 +75,7 @@ public class PhysicsObject : MonoBehaviour {
     }
 
     public void ApplyGravity() {
-
+        
         acceleration += new Vector3(0f, -gravityAmount, 0f);
     }
 }

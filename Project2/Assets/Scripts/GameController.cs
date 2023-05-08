@@ -130,15 +130,13 @@ public class GameController : MonoBehaviour {
                 foreach (Chunk[] chunkRow in chunks) {
                     foreach (Chunk chunk in chunkRow) {
                         foreach (Agent agent in chunk.agents) {
-                            if (agent is TRex rex) {
-                                rex.isHunting = true;
-                            }
+                            Debug.Log(agent.CheckForGround());
                         }
                     }
                 }
             }
             if (Input.GetKeyDown(KeyCode.F5)) {
-                StartCoroutine(SpawnAgentsAtCamera(5));
+                SpawnAgent(dinoIndex, player.transform.position);
             }
             //change the selected dinosaur to spawn
             if (Input.GetKeyDown(KeyCode.UpArrow)) {
@@ -156,12 +154,12 @@ public class GameController : MonoBehaviour {
 
         for (int x = 0; x < numAgentsToSpawn; x++) {
             //SpawnAgent(x % agentPrefabs.Count);
-            var height = terrain.SampleHeight(Camera.main.transform.position);
-            var pos = new Vector3(
-                Camera.main.transform.position.x + x * 5,
-                height,
-                Camera.main.transform.position.z + x * 5);
-            SpawnAgent(dinoIndex, pos);
+         //   var height = terrain.SampleHeight(Camera.main.transform.position);
+           // var pos = new Vector3(
+             //   Camera.main.transform.position.x + x * 5,
+             //   height,
+             //   Camera.main.transform.position.z + x * 5);
+            SpawnAgent(dinoIndex, Camera.main.transform.position);
             yield return new WaitForEndOfFrame();
         }
         //  StartCoroutine(ResetGravityAfterSeconds(10));
@@ -222,8 +220,8 @@ public class GameController : MonoBehaviour {
         agent.GetComponent<Agent>().UpdateChunk(GetChunk(agent.transform.position));
     }
     private void SpawnAgent(int agentNum, Vector3 location) {
-        float yLoc = terrain.SampleHeight(new Vector3(location.x, 0f, location.z)) + 1;
-        GameObject agent = Instantiate(agentPrefabs[agentNum], new Vector3(location.x, yLoc, location.z), Quaternion.identity);
+      //  float yLoc = terrain.SampleHeight(new Vector3(location.x, 0f, location.z)) + 1;
+        GameObject agent = Instantiate(agentPrefabs[agentNum], location, Quaternion.identity);
         agent.GetComponent<Agent>().UpdateChunk(GetChunk(agent.transform.position));
     }
     
