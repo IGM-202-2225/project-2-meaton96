@@ -8,7 +8,7 @@ public class Bullet : PhysicsObject {
     //public List<PhysicsObject> objects;
     public List<TreeObject> trees;
     private GameController gameController;
-    [SerializeField] private GameObject dinoHitExplosion, groundHitExplosion, smokeTrail;
+   // [SerializeField] private GameObject dinoHitExplosion, groundHitExplosion, smokeTrail;
     [SerializeField] private Terrain ground;
     [SerializeField] private AudioSource explosionSound;
     protected override void Awake() {
@@ -28,7 +28,7 @@ public class Bullet : PhysicsObject {
         transform.Rotate(Vector3.right * 90f);
 
         if (CheckForGround()) {
-            Instantiate(groundHitExplosion, transform.position, Quaternion.identity);
+          //  Instantiate(groundHitExplosion, transform.position, Quaternion.identity);
             explosionSound.Play();
             Destroy(gameObject);
 
@@ -59,7 +59,7 @@ public class Bullet : PhysicsObject {
                     obj.alive = false;
                     obj.isActive = false;
 
-                    Instantiate(dinoHitExplosion, transform.position, Quaternion.identity);
+                 //  Instantiate(dinoHitExplosion, transform.position, Quaternion.identity);
                     explosionSound.Play();
 
                     //gameController.GetChunk(transform.position).Update();

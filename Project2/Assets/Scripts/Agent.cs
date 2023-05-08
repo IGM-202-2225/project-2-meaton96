@@ -170,6 +170,7 @@ public class Agent : PhysicsObject {
         base.Update();
         Chunk temp = null;
         if (alive) {
+            //Debug.Log(CheckForGround());
             try {
                 temp = gameController.GetChunk(transform.position);
 

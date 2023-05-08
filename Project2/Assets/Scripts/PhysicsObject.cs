@@ -47,7 +47,7 @@ public class PhysicsObject : MonoBehaviour {
         sCollider.Update(transform.position);
     }
     public virtual bool CheckForGround() {
-        return terrain.SampleHeight(new Vector3(transform.position.x, 0f, transform.position.z)) >= transform.position.y;
+        return terrain.SampleHeight(transform.position) >= transform.position.y;
     }
     protected virtual void HandleGroundCollision() {
         velocity.y = 0;

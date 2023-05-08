@@ -86,7 +86,7 @@ public class GameController : MonoBehaviour {
 
             if (pursueTimer >= pursueTime) {
                 pursueTime = 0f;
-              //  StartAgentHuntingForPlayer();
+               // StartAgentHuntingForPlayer();
             }
             else {
                 pursueTimer += Time.deltaTime;
@@ -105,10 +105,13 @@ public class GameController : MonoBehaviour {
             //start spawn agent coroutine to spawn a bunch of agents
             //also increase the gravity by 5 times to have the agents drop quickly
             if (Input.GetKeyDown(KeyCode.F2)) {
-                StartCoroutine(SpawnAgents(dinoIndex, 150));
-                //   gravityAmount *= 5f;
-
-                // UpdateChunks();
+                foreach (var chunkRow in chunks) {
+                    foreach (var chunk in chunkRow) {
+                        foreach (var agent in chunk.agents) {
+                            ((TRex)agent).PursueTarget(player.transform);
+                        }
+                    }
+                }
             }
             //toggle obstacle avoidance for all agents
             if (Input.GetKeyDown(KeyCode.F3)) {

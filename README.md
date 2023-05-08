@@ -184,10 +184,9 @@ A small carniverous dinosaur that travels around in a pack
 
 -  Tree Hitboxes are bugged and have been disabled
 -  There is currently no collision resolution between players and dinosaurs
--  Shooting close range dinosaurs has odd behaviour
+-  Shooting has odd behaviour
 -  Controls text displayed on screen is not updated
--  Flying agents are spawning near the ground
--  Pursuing agents ignore gravity
+-  some agents are having issues with gravity
 
 
 ## Documentation
@@ -221,7 +220,8 @@ Pursuit can be viewed in the Trex class [View TRex.cs on Github](Project2/Assets
       -  Fixed issue preventing the game from being paused
 	-  Added Shooting sound effect
 	-  Fixed an issue with wander which was outputing a steering force with a negative y value
-	-  Added Explosion Visual and Sound effect to bullets
+	-  No post processing on the openGL web build makes the scene look bad
+	
 
 ### Requirements not completed
 
