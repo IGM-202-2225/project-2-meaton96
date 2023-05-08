@@ -1165,7 +1165,6 @@ GameObject:
   - component: {fileID: 4803755809172858}
   - component: {fileID: 95567079178023878}
   - component: {fileID: 7442971626831181601}
-  - component: {fileID: 3960994815734050111}
   m_Layer: 0
   m_Name: flyer
   m_TagString: Flyer
@@ -1223,36 +1222,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfc2005dec0a1cf4ab4f9bd123c8e216, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  direction: {x: 0, y: 0, z: 0}
   velocity: {x: 0, y: 0, z: 0}
-  acceleration: {x: 0, y: 0, z: 0}
   mass: 0
-  frictionEnabled: 0
-  frictionAmount: 0
-  gravityEnabled: 0
-  bounceAmount: 0
-  collisionEnabled: 1
   radius: 0
-  terrain: {fileID: 0}
   movingPower: 0
   isActive: 0
   avoidingObstacles: 1
   alive: 1
   _id: 0
   state: 0
---- !u!135 &3960994815734050111
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1491578732314578}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 2
-  m_Center: {x: 0, y: 0.5, z: -0.5}
 --- !u!1 &1522205292056044
 GameObject:
   m_ObjectHideFlags: 0

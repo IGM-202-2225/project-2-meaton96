@@ -17,7 +17,7 @@ public class Player : PhysicsObject {
     private Quaternion playerRotation;
     private float shootSoundRadius = 50f;
 
-    private bool paused = false;
+    //private bool paused = false;
 
     [SerializeField] private GameObject hudImage, crossHair;
 
@@ -33,10 +33,12 @@ public class Player : PhysicsObject {
 
     Vector2 mousePos;
     public float sensitivity = 1.5f;
+
+    private AudioSource gunShotSound;
     // Start is called before the first frame update
     void Start() {
         gravityEnabled = false;
-
+        gunShotSound = GetComponent<AudioSource>();
         //gravityAmount = 30f;
     }
     public void InitPlayer() {
@@ -50,11 +52,13 @@ public class Player : PhysicsObject {
         freeCam = false;
     }
     public override void Update() {
+        //Debug.Log(freeCam);
         if (gameController.mainMenu) {
 
         }
         else {
             if (freeCam) {
+                
                 CameraKeyboardMovement();
             }
             else {
@@ -84,14 +88,12 @@ public class Player : PhysicsObject {
             }
 
             if (Input.GetKeyDown(KeyCode.Tab)) {
-                Debug.Log("tab called");
                 velocity = Vector3.zero;
                 hudImage.SetActive(freeCam);
                 crossHair.SetActive(freeCam);
                 gravityEnabled = freeCam;
                 
                 freeCam = !freeCam;
-                Debug.Log(freeCam);
 
                 if (freeCam) {
                     playerLocation = transform.position;
@@ -101,10 +103,10 @@ public class Player : PhysicsObject {
                     transform.SetPositionAndRotation(playerLocation, playerRotation);
                 }
             }
-            if (Input.GetKeyDown(KeyCode.Escape)) {
-                Time.timeScale = paused ? 1f : 0f;
-                paused = !paused;
-            }
+            //if (Input.GetKeyDown(KeyCode.Escape)) {
+            //    Time.timeScale = paused ? 1f : 0f;
+            //    paused = !paused;
+            //}
 
             mousePos.x += Input.GetAxis("Mouse X") * sensitivity;
             mousePos.y += Input.GetAxis("Mouse Y") * sensitivity;
@@ -126,7 +128,7 @@ public class Player : PhysicsObject {
         total += terrain.SampleHeight(new Vector3(transform.position.x, 0f, transform.position.z + .5f));
         total += terrain.SampleHeight(new Vector3(transform.position.x, 0f, transform.position.z - .5f));
         total /= 4.0f;
-        if (transform.position.y <= total + playerHeight + 3.5) {
+        if (transform.position.y <= total + playerHeight + 3.6) {
             Vector3 pos = transform.position;
             pos.y = total + playerHeight;
             velocity.y = 0f;
@@ -168,8 +170,10 @@ public class Player : PhysicsObject {
 
     }
     private void FireBullet() {
-        Bullet bullet = Instantiate(bulletPrefab, Camera.main.transform.position, Quaternion.identity).GetComponent<Bullet>();
-        bullet.Fire(Camera.main.transform.forward, gameController);
+        Bullet bullet = Instantiate(bulletPrefab, transform.position, Quaternion.identity).GetComponent<Bullet>();
+        bullet.Fire(transform.forward, gameController);
+        Debug.Log(transform.forward);
+        gunShotSound.Play();
 
         gameController.
             GetChunk(transform.position).

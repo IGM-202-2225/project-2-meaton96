@@ -10,11 +10,11 @@ public class Velociraptor : Agent {
     protected float flockRange = 50f;
 
     [Range(0f, 2f)]
-    public  float sepMulti = 0f;
+    public float sepMulti = .2f;
     [Range(0f, 2f)]
     public float aliMulti = 1f;
     [Range(0f, 2f)]
-    public float cohMulti = 1f;
+    public float cohMulti = .5f;
 
 
     protected override void Awake() {
@@ -59,13 +59,12 @@ public class Velociraptor : Agent {
 
         Vector3 desiredVelocity = (pursuePos - transform.position).normalized * maxSpeed;
 
-        pursuePos.y = transform.position.y;
+        Vector3 steeringForce = desiredVelocity - velocity;
+        steeringForce.y = 0;
 
-        return desiredVelocity - velocity;
+        return steeringForce;
     }
     protected override Vector3 Flock() {
-
-        
 
         return Seperate() * sepMulti +
                 Align() * aliMulti +
@@ -90,7 +89,6 @@ public class Velociraptor : Agent {
         }
         sum /= agentsInRange.Count;
 
-        sum *= 1f;
 
         Vector3 steer = (sum - velocity).normalized * maxSpeed;
         return steer;

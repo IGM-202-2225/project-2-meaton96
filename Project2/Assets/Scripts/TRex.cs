@@ -47,12 +47,15 @@ public class TRex : Agent {
 
             (pursuePredictTime * (-(4 - distance) / distance));
 
-        pursuePos.y = transform.position.y;
+        
 
         Vector3 desiredVelocity = (pursuePos - transform.position).normalized * maxSpeed;
+        
+        Vector3 steeringForce = desiredVelocity - velocity;
+        //Debug.Log(steeringForce.ToString());
+        steeringForce.y = 0;
 
-
-        return desiredVelocity - velocity;
+        return steeringForce;
     }
 
 

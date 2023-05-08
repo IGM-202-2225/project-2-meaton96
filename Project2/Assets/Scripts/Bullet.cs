@@ -8,14 +8,16 @@ public class Bullet : PhysicsObject {
     //public List<PhysicsObject> objects;
     public List<TreeObject> trees;
     private GameController gameController;
-
+    [SerializeField] private GameObject dinoHitExplosion, groundHitExplosion, smokeTrail;
+    [SerializeField] private Terrain ground;
+    [SerializeField] private AudioSource explosionSound;
     protected override void Awake() {
         base.Awake();
         firePower = 1900;
         mass = 2f;
         radius = .45f;
-
-
+        explosionSound = GetComponent<AudioSource>();
+        ground = GameObject.FindWithTag("Ground").GetComponent<Terrain>();
     }
     public void Fire(Vector3 spawnPos, GameController gameController) {
         this.gameController = gameController;
@@ -25,10 +27,12 @@ public class Bullet : PhysicsObject {
         transform.localRotation = Quaternion.LookRotation(direction);
         transform.Rotate(Vector3.right * 90f);
 
-        if (CheckForGround())
+        if (CheckForGround()) {
+            Instantiate(groundHitExplosion, transform.position, Quaternion.identity);
+            explosionSound.Play();
             Destroy(gameObject);
 
-
+        }
 
         ResolveCollision();
 
@@ -36,7 +40,7 @@ public class Bullet : PhysicsObject {
     }
     public override bool CheckForGround() {
 
-        return transform.position.y <= -5f;
+        return transform.position.y <= terrain.SampleHeight(transform.position);
 
 
     }
@@ -54,6 +58,9 @@ public class Bullet : PhysicsObject {
                     
                     obj.alive = false;
                     obj.isActive = false;
+
+                    Instantiate(dinoHitExplosion, transform.position, Quaternion.identity);
+                    explosionSound.Play();
 
                     //gameController.GetChunk(transform.position).Update();
                     Destroy(gameObject);

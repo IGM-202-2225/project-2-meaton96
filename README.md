@@ -166,10 +166,11 @@ A small carniverous dinosaur that travels around in a pack
 ## Sources
 
 -   https://assetstore.unity.com/packages/tools/terrain/gaia-2021-terrain-scene-generator-193509
--   https://assetstore.unity.com/packages/vfx/shaders/free-skybox-extended-shader-107400
 -   https://assetstore.unity.com/packages/3d/characters/animals/low-poly-animated-dinosaurs-110313
 	- I stripped out all of the code and colliders from the dinosaurs, removing all of their behaviors
 	- This has been replaced with my own sphere collider setup and agent script as described in the project outline
+-  https://assetstore.unity.com/packages/vfx/particles/fire-explosions/3d-fire-and-explosions-176981
+-  https://assetstore.unity.com/packages/3d/airplane-42229
 
 ## Make it Your Own
 
@@ -182,12 +183,12 @@ A small carniverous dinosaur that travels around in a pack
 ## Known Issues
 
 -  Tree Hitboxes are bugged and have been disabled
--  freecam toggle is not currently working
 -  There is currently no collision resolution between players and dinosaurs
--  Feedback that the gun was fired is basically 0
 -  Shooting close range dinosaurs has odd behaviour
 -  Controls text displayed on screen is not updated
--  Flee trigger when shooting gun is not working
+-  Flying agents are spawning near the ground
+-  Pursuing agents ignore gravity
+
 
 ## Documentation
 
@@ -207,7 +208,7 @@ Pursuit can be viewed in the Trex class [View TRex.cs on Github](Project2/Assets
 	-  Seperation now applies a force on itself away from all other agents instead of applying a force to other agents--
 - 0.0.4
 	-  Fixed Seperation bug that was causing it to not function properly
-- 0.1
+-  0.1
 	-  Fixed issue causing camera shake with player when on the ground
 	-  Fixed issue causing dinosaurs to fly into the air during pursuit
 	-  Fixed bounds issue causing flying dinosaurs to move outside of the chunk system resulting in NullPointer
@@ -215,7 +216,13 @@ Pursuit can be viewed in the Trex class [View TRex.cs on Github](Project2/Assets
 		-  every 10 seconds a random carnivourous dinosaur will decide to pursue the player
 	-  Added Velociraptor (See above section)
 	
-	
+-  0.2
+      -  Fixed issue preventing free cam from working
+      -  Fixed issue preventing the game from being paused
+	-  Added Shooting sound effect
+	-  Fixed an issue with wander which was outputing a steering force with a negative y value
+	-  Added Explosion Visual and Sound effect to bullets
+
 ### Requirements not completed
 
 _If you did not complete a project requirement, notate that here_

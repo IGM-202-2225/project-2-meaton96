@@ -10,7 +10,7 @@ using UnityEngine.UI;
 public class GameController : MonoBehaviour {
 
     public string buildNumber = "0.1";                                                      //build number to display on screen to make checking build pushes easier
-    public float DEFAULT_GRAVITY = 10f;                                                         //default gravity value
+    //public float DEFAULT_GRAVITY = 10f;                                                         //default gravity value
 
     public int numChunks = 16;                                                                  //number of chunks of the map
     public int startingPoint = -1024;                                                           //starting x,y point, terrain's corner
@@ -22,11 +22,11 @@ public class GameController : MonoBehaviour {
     //private float updateTimer, updateTime = 5f;                                                 //update variables for updating chunks
     private Terrain terrain;                                                                    //reference to the terrain object
     public bool agentsAvoidObj = true;                                                          //whether or not agent obstacle avoidance is enabled
-    public float gravityAmount;                                                                 //the current gravity amount
+    //public float gravityAmount;                                                                 //the current gravity amount
     public bool mainMenu = true;
     [SerializeField] private GameObject uiComponents;
 
-    private readonly int[] NUM_DINOS_TO_SPAWN = { 100, 100, 50, 16 };
+    [SerializeField] private int[] NUM_DINOS_TO_SPAWN = new int[4];
     //private bool[] finishedSpawning = { false, false, false, false };
     [SerializeField] private Player player;
     [SerializeField] private IntroBehaviour introBehaviour;
@@ -44,7 +44,7 @@ public class GameController : MonoBehaviour {
         MyJsonUtility.ParseAllJson();
         //grab terrain object and set gravity default
         terrain = GameObject.FindWithTag("Ground").GetComponent<Terrain>();
-        gravityAmount = DEFAULT_GRAVITY;
+        //gravityAmount = DEFAULT_GRAVITY;
 
         //create new chunk arrays
         for (int x = 0; x < chunks.Length; x++) {
@@ -86,7 +86,7 @@ public class GameController : MonoBehaviour {
 
             if (pursueTimer >= pursueTime) {
                 pursueTime = 0f;
-                StartAgentHuntingForPlayer();
+              //  StartAgentHuntingForPlayer();
             }
             else {
                 pursueTimer += Time.deltaTime;

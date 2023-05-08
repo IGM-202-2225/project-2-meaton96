@@ -9,10 +9,11 @@ public class IntroBehaviour : MonoBehaviour {
     [SerializeField] private GameObject startButton;
     [SerializeField] private TextMeshProUGUI introText;
     [SerializeField] private GameObject introTextObject;
-   // [SerializeField] private GameObject GaiaController;
+    // [SerializeField] private GameObject GaiaController;
     private bool isFlying = false;
     private bool isShowingText = false;
     private int index = 0;
+    private bool dropped = false;
 
     private readonly string[] introStrings = {
         "You are about to be dropped onto an island infested with dinosaurs...",
@@ -35,19 +36,22 @@ public class IntroBehaviour : MonoBehaviour {
             Vector3 pos = transform.position;
             pos.x += speed * Time.deltaTime;
             transform.position = pos;
-            
+
             if (!isShowingText && index < introStrings.Length) {
                 isShowingText = true;
-                StartCoroutine(ShowNextText()); 
+                StartCoroutine(ShowNextText());
             }
-            
-        }
-        if (transform.position.x > 0 ) {
-            gameController.Drop();
-            GetComponent<AudioSource>().volume = 0;
 
-       //    GaiaController.SetActive(true);
-            
+        }
+        if (transform.position.x > 0) {
+            if (!dropped) {
+                gameController.Drop();
+                dropped = true;
+                GetComponent<AudioSource>().volume = 0;
+            }
+
+            //    GaiaController.SetActive(true);
+
         }
         else if (transform.position.x > 5000) {
             Destroy(gameObject);
@@ -62,8 +66,8 @@ public class IntroBehaviour : MonoBehaviour {
         Color color = introText.color;
         color.a = 0;
         introText.color = color;
-        Time.timeScale = 1f;    
-        
+        Time.timeScale = 1f;
+
     }
     public void ByPassFlight() {
         startButton.SetActive(false);
@@ -78,7 +82,7 @@ public class IntroBehaviour : MonoBehaviour {
             color = introText.color;
             color.a += 255 / fadeSteps;
             introText.color = color;
-            yield return new WaitForSeconds(fadeInTime/fadeSteps);
+            yield return new WaitForSeconds(fadeInTime / fadeSteps);
         }
         yield return new WaitForSeconds(onScreenTime);
         index++;

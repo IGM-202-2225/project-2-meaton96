@@ -40,7 +40,7 @@ public class Agent : PhysicsObject {
     protected const float AVOID_DISTANCE = 25f, OBSTACLE_AVOID_POWER = .6f;
 
     public bool avoidingObstacles = true;
-    float sperateMulti = 40f;
+    protected float sperateMulti = 40f;
     protected Chunk chunk;
 
     
@@ -65,7 +65,9 @@ public class Agent : PhysicsObject {
     public void SetTarget(Transform target) {
         this.target = target;
     }
-
+    protected virtual void TeleportToMiddle() {
+        transform.position = new Vector3(0, terrain.SampleHeight(Vector3.zero), 0);
+    }
 
     protected override void Awake() {
         gameController = GameObject.FindWithTag("GameController").GetComponent<GameController>();
@@ -173,6 +175,7 @@ public class Agent : PhysicsObject {
 
             } catch (IndexOutOfRangeException) {
                 Debug.Log(gameObject.name + " " + transform.position.ToString());
+                TeleportToMiddle();
             }
             if (chunk != temp) {
                 UpdateChunk(temp);
@@ -194,6 +197,7 @@ public class Agent : PhysicsObject {
                         break;
                     case State.wandering:
                         totalForces += Wander();
+                        
                         totalForces += Flock();
                         break;
                     case State.fleeing:
@@ -333,9 +337,9 @@ public class Agent : PhysicsObject {
 
     protected virtual Vector3 Wander() {
         Vector3 circleCenter;
-        circleCenter = new Vector3(velocity.x, velocity.y, velocity.z).normalized * wanderCircleDistance;
+        circleCenter = new Vector3(velocity.x, 0, velocity.z).normalized * wanderCircleDistance;
 
-        Vector3 displacement = Vector3.down * wanderCircleRadius;
+        Vector3 displacement = Vector3.forward * wanderCircleRadius;
 
         displacement.x = Mathf.Cos(wanderAngle) * displacement.magnitude;
         displacement.z = Mathf.Sin(wanderAngle) * displacement.magnitude;
@@ -343,7 +347,7 @@ public class Agent : PhysicsObject {
         wanderAngle += UnityEngine.Random.Range(-wanderAnglechange, wanderAnglechange);
 
         Vector3 wanderForce = displacement + circleCenter;
-
+        
         return wanderForce;
 
     }
@@ -387,13 +391,14 @@ public class Agent : PhysicsObject {
     }
     public void KillTarget() {
         Agent agent = target.GetComponent<Agent>();
-        agent.animator.SetTrigger("Die");
-        agent.alive = false;
-        agent.isActive = false;
-        chunk.RemoveAgentFromChunk(agent);
-        target = null;
-
-        state = State.idle;
+        if (agent != null) {    
+            agent.animator.SetTrigger("Die");
+            agent.alive = false;
+            agent.isActive = false;
+            chunk.RemoveAgentFromChunk(agent);
+            target = null;
+        }
+        state = State.wandering;
     }
     //check each level of collision against other SphereCollider
     public override bool CheckCollision(SimpleSphereCollider other) {
