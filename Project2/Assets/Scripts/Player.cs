@@ -12,7 +12,7 @@ public class Player : PhysicsObject {
     [SerializeField] private float speed;
     public Transform targetObject;
 
-    private bool freeCam;
+    public bool freeCam;
     private Vector3 playerLocation;
     private Quaternion playerRotation;
     private float shootSoundRadius = 50f;

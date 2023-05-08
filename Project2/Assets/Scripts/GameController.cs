@@ -33,11 +33,11 @@ public class GameController : MonoBehaviour {
     [SerializeField] private Camera gameCamera, introCamera;
 
     private float pursueTimer, pursueTime = 10f;
-    
+
 
     // Start is called before the first frame update
     void Start() {
-        
+
         chunks = new Chunk[(int)Mathf.Sqrt(numChunks)][];
         //tell the MyJsonUtility static class to parse all of the json data from the file
         MyJsonUtility.SetJsonText(agentDataJson.text);
@@ -80,105 +80,96 @@ public class GameController : MonoBehaviour {
     void Update() {
 
         if (mainMenu) {
-            
+
         }
         else {
 
             if (pursueTimer >= pursueTime) {
                 pursueTime = 0f;
-               // StartAgentHuntingForPlayer();
+                StartAgentHuntingForPlayer();
             }
             else {
                 pursueTimer += Time.deltaTime;
             }
+            if (player.freeCam) {
+                //toggle on or off movement logic for all agents
+                if (Input.GetKeyDown(KeyCode.F1)) {
+                    foreach (var chunkRow in chunks) {
+                        foreach (var chunk in chunkRow) {
+                            foreach (var agent in chunk.agents) {
+                                agent.ToggleAI();
+                            }
+                        }
+                    }
+                }
+                //start spawn agent coroutine to spawn a bunch of agents
+                //also increase the gravity by 5 times to have the agents drop quickly
+                if (Input.GetKeyDown(KeyCode.F2)) {
+                    foreach (var chunkRow in chunks) {
+                        foreach (var chunk in chunkRow) {
+                            foreach (var agent in chunk.agents) {
+                                ((TRex)agent).PursueTarget(player.transform);
+                            }
+                        }
+                    }
+                }
+                //toggle obstacle avoidance for all agents
+                if (Input.GetKeyDown(KeyCode.F3)) {
+                    foreach (var chunkRow in chunks) {
+                        foreach (var chunk in chunkRow) {
+                            foreach (var agent in chunk.agents) {
+                                agent.avoidingObstacles = !agent.avoidingObstacles;
+                                agentsAvoidObj = !agentsAvoidObj;
+                            }
+                        }
+                    }
+                }
 
-            //toggle on or off movement logic for all agents
-            if (Input.GetKeyDown(KeyCode.F1)) {
-                foreach (var chunkRow in chunks) {
-                    foreach (var chunk in chunkRow) {
-                        foreach (var agent in chunk.agents) {
-                            agent.ToggleAI();
-                        }
-                    }
+                if (Input.GetKeyDown(KeyCode.F5)) {
+                    SpawnAgent(dinoIndex, player.transform.position);
                 }
-            }
-            //start spawn agent coroutine to spawn a bunch of agents
-            //also increase the gravity by 5 times to have the agents drop quickly
-            if (Input.GetKeyDown(KeyCode.F2)) {
-                foreach (var chunkRow in chunks) {
-                    foreach (var chunk in chunkRow) {
-                        foreach (var agent in chunk.agents) {
-                            ((TRex)agent).PursueTarget(player.transform);
-                        }
-                    }
+                //change the selected dinosaur to spawn
+                if (Input.GetKeyDown(KeyCode.UpArrow)) {
+                    dinoIndex++;
+                    if (dinoIndex >= agentPrefabs.Count) { dinoIndex = 0; }
                 }
-            }
-            //toggle obstacle avoidance for all agents
-            if (Input.GetKeyDown(KeyCode.F3)) {
-                foreach (var chunkRow in chunks) {
-                    foreach (var chunk in chunkRow) {
-                        foreach (var agent in chunk.agents) {
-                            agent.avoidingObstacles = !agent.avoidingObstacles;
-                            agentsAvoidObj = !agentsAvoidObj;
-                        }
-                    }
+                if (Input.GetKeyDown(KeyCode.DownArrow)) {
+                    dinoIndex--;
+                    if (dinoIndex < 0) { dinoIndex = agentPrefabs.Count - 1; }
                 }
-            }
-            //toggles on the hunting function for trexs
-            //its off by default to allow agents time to drop and spread out before starting pursuit logic
-            if (Input.GetKeyDown(KeyCode.F4)) {
-                foreach (Chunk[] chunkRow in chunks) {
-                    foreach (Chunk chunk in chunkRow) {
-                        foreach (Agent agent in chunk.agents) {
-                            Debug.Log(agent.CheckForGround());
-                        }
-                    }
-                }
-            }
-            if (Input.GetKeyDown(KeyCode.F5)) {
-                SpawnAgent(dinoIndex, player.transform.position);
-            }
-            //change the selected dinosaur to spawn
-            if (Input.GetKeyDown(KeyCode.UpArrow)) {
-                dinoIndex++;
-                if (dinoIndex >= agentPrefabs.Count) { dinoIndex = 0; }
-            }
-            if (Input.GetKeyDown(KeyCode.DownArrow)) {
-                dinoIndex--;
-                if (dinoIndex < 0) { dinoIndex = agentPrefabs.Count - 1; }
             }
         }
     }
-    
+
     private IEnumerator SpawnAgentsAtCamera(int numAgentsToSpawn) {
 
         for (int x = 0; x < numAgentsToSpawn; x++) {
             //SpawnAgent(x % agentPrefabs.Count);
-         //   var height = terrain.SampleHeight(Camera.main.transform.position);
-           // var pos = new Vector3(
-             //   Camera.main.transform.position.x + x * 5,
-             //   height,
-             //   Camera.main.transform.position.z + x * 5);
+            //   var height = terrain.SampleHeight(Camera.main.transform.position);
+            // var pos = new Vector3(
+            //   Camera.main.transform.position.x + x * 5,
+            //   height,
+            //   Camera.main.transform.position.z + x * 5);
             SpawnAgent(dinoIndex, Camera.main.transform.position);
             yield return new WaitForEndOfFrame();
         }
         //  StartCoroutine(ResetGravityAfterSeconds(10));
     }
     //drop gravity back to default after seconds
-    
+
     public IEnumerator SpawnAgents(int dinoIndex, int numAgentsToSpawn) {
 
         for (int x = 0; x < numAgentsToSpawn; x++) {
             SpawnAgent(dinoIndex);
             yield return new WaitForEndOfFrame();
         }
-        
+
     }
     //Spawns a single agent of type agentNum from the prefab list
     //at a random location within the circle defined by radius
     private void SpawnAgent(int agentNum) {
 
-            
+
         float radius = 700;
 
         float xLoc = UnityEngine.Random.Range(-radius, radius);
@@ -205,9 +196,9 @@ public class GameController : MonoBehaviour {
                 float height = terrain.SampleHeight(new Vector3(vec.x, 0f, vec.y));
                 GameObject agentInstance = Instantiate(agentPrefabs[agentNum],
                     new Vector3(
-                        vec.x, 
-                        height + UnityEngine.Random.Range(height + minY, height + maxY), 
-                        vec.y), 
+                        vec.x,
+                        height + UnityEngine.Random.Range(height + minY, height + maxY),
+                        vec.y),
                     Quaternion.identity);
 
                 agentInstance.GetComponent<Agent>().UpdateChunk(GetChunk(agentInstance.transform.position));
@@ -220,11 +211,11 @@ public class GameController : MonoBehaviour {
         agent.GetComponent<Agent>().UpdateChunk(GetChunk(agent.transform.position));
     }
     private void SpawnAgent(int agentNum, Vector3 location) {
-      //  float yLoc = terrain.SampleHeight(new Vector3(location.x, 0f, location.z)) + 1;
+        //  float yLoc = terrain.SampleHeight(new Vector3(location.x, 0f, location.z)) + 1;
         GameObject agent = Instantiate(agentPrefabs[agentNum], location, Quaternion.identity);
         agent.GetComponent<Agent>().UpdateChunk(GetChunk(agent.transform.position));
     }
-    
+
     //returns the chunk that the given vector position is located in
     public Chunk GetChunk(Vector3 pos) {
         int x = ((int)pos.x - startingPoint) / multi;
@@ -258,7 +249,7 @@ public class GameController : MonoBehaviour {
         mainMenu = false;
         Time.timeScale = 1f;
     }
-    
+
 
 
 

@@ -16,12 +16,7 @@ Player can explode trees to adjust dinosaur pathing behaviors
 
 ### Controls
 
--   Fly-cam current controls
-    -   WASD to move camera, right click and drag to rotate camera
-    -   F1 to toggle dinosaur AI, F2 to spawn dinosaurs, F3 to toggle obstacle avoidance
-    -   Up/Down arrow to chose a dinosaur to spawn
-    -   Space bar to fire a bullet
-    -   Bullets can interact with dinosaurs and trees, bullets kills dinosaurs and also will knock trees over
+-   Displayed on screen
 
 ## T-rex
 
@@ -185,9 +180,6 @@ A small carniverous dinosaur that travels around in a pack
 -  Tree Hitboxes are bugged and have been disabled
 -  There is currently no collision resolution between players and dinosaurs
 -  Shooting has odd behaviour
--  Controls text displayed on screen is not updated
--  some agents are having issues with gravity
-
 
 ## Documentation
 
@@ -195,7 +187,7 @@ A small carniverous dinosaur that travels around in a pack
 
 Pursuit can be viewed in the Trex class [View TRex.cs on Github](Project2/Assets/Scripts/TRex.cs)
 
--  0.0.3
+-  0.0.3 (Checkpoint 2)
 	-  Fixed bug with friction preventing flying dinosaurs from actually moving
 	-  Removed some old variables and updated the JSON to read in new movement variables
 	-  Added obstacle avoidance for the two ground dinosaurs
@@ -205,23 +197,26 @@ Pursuit can be viewed in the Trex class [View TRex.cs on Github](Project2/Assets
 - 0.0.3.1
 	-  Updated all movement logic to return steering vectors instead of apply their own forces. All forces are summed and finally multiplied by a movingPower scalar. This should be more efficient.
 	-  Seperation now applies a force on itself away from all other agents instead of applying a force to other agents--
-- 0.0.4
+- 0.0.4 (Checkpoint 3)
 	-  Fixed Seperation bug that was causing it to not function properly
--  0.1
+-  0.1 
 	-  Fixed issue causing camera shake with player when on the ground
 	-  Fixed issue causing dinosaurs to fly into the air during pursuit
 	-  Fixed bounds issue causing flying dinosaurs to move outside of the chunk system resulting in NullPointer
 	-  Added dinosaur pursuit of player
 		-  every 10 seconds a random carnivourous dinosaur will decide to pursue the player
 	-  Added Velociraptor (See above section)
-	
 -  0.2
       -  Fixed issue preventing free cam from working
       -  Fixed issue preventing the game from being paused
 	-  Added Shooting sound effect
 	-  Fixed an issue with wander which was outputing a steering force with a negative y value
 	-  No post processing on the openGL web build makes the scene look bad
-	
+-  0.3
+	-  Fixed gravity
+-  0.4 
+	-  Fixed Controls text
+	-  Fixed bug with flying dino's StayInBounds 
 
 ### Requirements not completed
 
